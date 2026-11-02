@@ -22,13 +22,15 @@ Backlog from CLAUDE.md, ordered by impact.
 - [ ] When goodput / kvwire publish a first measured result, add it to the proof strip with a link to the run directory.
 - [x] Hugging Face update: infra-incident-intel in proof strip, Reliability block (Models row + Space links), Foundations and Profiles; "Interactive notes" wording replaced site-wide.
 - [ ] When `infra-failure-bench` or the triage model is published on the Hub, link it directly from the Reliability block and Foundations.
+- [x] Nov 2026 refresh: removed LinkedIn, Substack and X site-wide; removed dead links (infra-incident-intel repo 404, infra-triage-demo / infra-rca-demo Spaces, NCCL-RCA model) and pointed them at the `qwen3-nccl-rca-lora` model card; dropped the false "6 model cards / 6 Spaces" row; numbered section kickers, wider featured posts, card hover, balanced headings.
 
 ## Open questions for Naresh
 
 - **vLLM PR #50618**: on GitHub it's by JohnQinAMD and unmerged. Did you contribute under another account, or is it a different PR number? Send the link and it becomes the first proof item.
 - Links for the **cudagraph padding issue** and the **libbpf BTF fix**, if they exist.
 - ~~Hero line~~: done, blend of A + C.
-- **Hugging Face:** the proof strip now points at `infra-incident-intel` and the two reserved Spaces (Oct 11). The 6 older model repos still hold a README only, so Foundations labels them `design`. Upload weights + eval to promote them.
-- The 5 removed posts (XDP 14 Mpps, DPDK PMD, RDMA, RoCE/PFC, SR-IOV): publish any real drafts on Substack and add them to `data.js`.
+- **Hugging Face:** the profile has one model repo (`qwen3-nccl-rca-lora`, README only) and no Spaces. If `infra-incident-intel` or the Spaces are private rather than gone, make them public and re-link.
+- **"~9 years"** in the hero bio linked to LinkedIn; now unlinked with a `TODO(naresh)`. Link evidence or cut.
+- The removed write-ups (DPDK, virtualization, LLM OS, AI infra roadmap essays; XDP / DPDK PMD / RDMA / RoCE / SR-IOV drafts): rebuild any worth keeping as an on-site post, or add as `kind: "external"` in `data.js`.
 
 Next session starts with: open questions above (vLLM PR link); then fix the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl that the site links to.

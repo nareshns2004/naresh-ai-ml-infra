@@ -1,7 +1,7 @@
 /*
   Writing index. Adding a post is a one-line edit: append an object.
     kind: "interactive" → a page under posts/ on this site
-          "substack"    → links out to Substack (don't duplicate content here)
+          "external"    → links out to a write-up hosted elsewhere
     date: "YYYY-MM-DD"  (sorted newest first; featured posts are pinned first)
 */
 window.POSTS = [
@@ -33,21 +33,4 @@ window.POSTS = [
     title: "The packet path: kernel stack vs XDP vs DPDK vs RDMA",
     summary: "Step one packet through four datapaths: where each step runs, how many copies it costs, and what each path gives up.",
     url: "posts/packet-path.html" },
-
-  { kind: "substack", date: "2026-05-07", tag: "Virtualization",
-    title: "Virtualization: The Foundation of Modern Cloud Computing",
-    summary: "How virtualization abstracts compute, storage and networking so many environments share one physical system.",
-    url: "https://nareshns2004.substack.com/p/virtualization-the-foundation-of" },
-  { kind: "substack", date: "2026-05-03", tag: "DPDK",
-    title: "Intel’s DPDK: The Userspace Data Plane That Rewired High-Performance Networking",
-    summary: "Why the Linux network stack hits a wall, and how DPDK’s userspace drivers bypass it.",
-    url: "https://nareshns2004.substack.com/p/intels-dpdk-the-userspace-data-plane" },
-  { kind: "substack", date: "2026-05-01", tag: "AI Systems",
-    title: "LLM Operating System (LLM OS) — LLM Agent",
-    summary: "The LLM-as-operating-system model compared with a traditional OS.",
-    url: "https://nareshns2004.substack.com/p/llm-operating-system-llm-os-llm-agent" },
-  { kind: "substack", date: "2026-04-26", tag: "AI Infra",
-    title: "AI-ML Infrastructure Engineering Roadmap",
-    summary: "What AI infrastructure engineering is, and the layers it spans.",
-    url: "https://nareshns2004.substack.com/p/ai-ml-infrastructure-engineering" },
 ];

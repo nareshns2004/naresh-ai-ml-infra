@@ -64,6 +64,16 @@
 .proof-fact { font-weight: 600; color: var(--text); line-height: 1.35; font-size: 0.95rem; }
 .proof-sub { color: var(--text-dim); font-size: 0.82rem; margin-top: 0.3rem; }
 
+/* ─── SECTION NUMBERS ─── */
+/* datasheet-style "§01 · Work" kickers, numbered in document order */
+main { counter-reset: sec; }
+.section-head { counter-increment: sec; }
+.section-head .section-kicker::before {
+  content: "§" counter(sec, decimal-leading-zero);
+  color: var(--accent); margin-right: 0.75rem; padding-right: 0.75rem;
+  border-right: 1px solid var(--border-bright);
+}
+
 /* ─── TWO PROBLEMS ─── */
 .problems { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .problem { padding: 2rem; border-top: 3px solid var(--pc); display: flex; flex-direction: column; gap: 1.1rem; }
@@ -84,13 +94,15 @@
 .problem-links a.primary { border-color: var(--pc); color: var(--pc); }
 
 /* ─── WRITING ─── */
-.writing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.writing-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.25rem; }
+.writing-grid > .post-card { grid-column: span 2; }
+.writing-grid > .post-card.featured { grid-column: span 3; }
+.post-card.featured .post-title { font-size: 1.3rem; }
 .post-card { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.7rem; position: relative; overflow: hidden; }
 .post-card.featured { border-top: 3px solid var(--signal); }
 .post-card.featured.eff { border-top-color: var(--copper); }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); }
 .post-kind { margin-left: auto; }
-.post-kind.interactive { color: var(--signal); }
 .post-title { font-family: var(--font-display); font-size: 1.12rem; line-height: 1.3; }
 .post-summary { color: var(--text-mid); font-size: 0.9rem; }
 
@@ -116,8 +128,7 @@
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg2); }
 
 /* ─── PROFILES ─── */
-.profile-label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.9rem; }
-.profiles-primary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.profiles-primary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .profile { padding: 1.4rem; display: flex; flex-direction: column; gap: 0.6rem; --pc: var(--accent); }
 a.profile:hover { border-color: var(--pc); }
 .profile-top { display: flex; align-items: center; gap: 0.8rem; }
@@ -131,12 +142,6 @@ a.profile:hover { border-color: var(--pc); }
 .profile-handle { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); }
 .profile-desc { color: var(--text-mid); font-size: 0.88rem; flex: 1; }
 .profile-cta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--pc); }
-.profiles-social { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.social {
-  display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem;
-  font-family: var(--font-mono); font-size: 0.82rem; color: var(--text); text-decoration: none;
-}
-.social span { color: var(--text-dim); font-size: 0.75rem; }
 
 /* ─── CONTACT ─── */
 .contact { padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden; border-color: var(--ink); }
@@ -163,6 +168,7 @@ a.profile:hover { border-color: var(--pc); }
   .proof { grid-template-columns: 1fr 1fr; }
   .problems { grid-template-columns: 1fr; }
   .writing-grid { grid-template-columns: 1fr 1fr; }
+  .writing-grid > .post-card, .writing-grid > .post-card.featured { grid-column: auto; }
   .profiles-primary { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {

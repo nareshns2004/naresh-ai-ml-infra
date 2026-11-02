@@ -48,13 +48,13 @@
     const posts = [...window.POSTS].sort((a, b) =>
       (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || b.date.localeCompare(a.date));
     grid.innerHTML = posts.map(p => {
-      const ext = p.kind === 'substack';
+      const ext = p.kind === 'external';
       const tone = p.tag === 'Efficiency' ? 'copper' : p.tag === 'Reliability' ? 'accent' : '';
       return `<a class="card post-card reveal${p.featured ? ' featured' : ''}${tone === 'copper' ? ' eff' : ''}" href="${esc(p.url)}"${ext ? ' target="_blank" rel="noopener"' : ''}>
         <div class="post-meta">
           <span class="chip${tone ? ' chip-' + tone : ''}">${esc(p.tag)}</span>
           <span>${fmt(p.date)}${p.minutes ? ` · ${p.minutes} min` : ''}</span>
-          <span class="post-kind ${ext ? '' : 'interactive'}">${ext ? 'Substack ↗' : '▶ Interactive'}</span>
+          ${ext ? '<span class="post-kind">Read ↗</span>' : ''}
         </div>
         <h3 class="post-title">${esc(p.title)}</h3>
         <p class="post-summary">${esc(p.summary)}</p>

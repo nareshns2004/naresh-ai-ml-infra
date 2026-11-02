@@ -143,7 +143,7 @@
       <li><strong>RDMA needs a fabric that cooperates.</strong> Hardware transport assumes little or no loss, which is why RoCE fabrics run <a href="pfc-deadlock.html">PFC and ECN</a>, and why NIC counters, not tcpdump, are how you debug them. That’s the gap <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof</a> works in.</li>
       <li><strong>The kernel stack still carries everything else:</strong> control planes, checkpoint and dataset traffic over TCP, and inference front-ends. Its per-packet cost is why tuning (RSS, GRO, busy polling, IRQ affinity) matters at high rates. <a href="https://github.com/nareshns2004/kernel-performance-toolkit" target="_blank" rel="noopener">kptk</a> is my toolkit for the CPU side of that.</li>
       <li><strong>eBPF is the programmable layer:</strong> XDP for early drops and steering, tc/eBPF for shaping and policy. My <a href="https://github.com/nareshns2004/kernel-level-ai-traffic-shaper" target="_blank" rel="noopener">traffic-shaper</a> repo is an early experiment there.</li>
-      <li><strong>DPDK</strong> wins where packet rate dominates and you can afford dedicated cores, such as virtual switches, load balancers and packet processing appliances. I wrote about it on <a href="https://nareshns2004.substack.com/p/intels-dpdk-the-userspace-data-plane" target="_blank" rel="noopener">Substack</a>.</li>
+      <li><strong>DPDK</strong> wins where packet rate dominates and you can afford dedicated cores, such as virtual switches, load balancers and packet processing appliances.</li>
     </ul>
   </div>
 
@@ -170,8 +170,6 @@
   <div class="footer-links">
     <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
     <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
-    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
   </div>
 </footer>
 

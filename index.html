@@ -16,7 +16,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Naresh Kumar: GPU cluster networking and distributed-training infrastructure">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@naresh_swe24">
 <meta name="twitter:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
 <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
@@ -33,10 +32,7 @@
   "sameAs": [
     "https://github.com/nareshns2004",
     "https://huggingface.co/nareshns2004",
-    "https://leetcode.com/u/nareshns2004/",
-    "https://www.linkedin.com/in/nareshns2004/",
-    "https://substack.com/@nareshns2004",
-    "https://x.com/naresh_swe24"
+    "https://leetcode.com/u/nareshns2004/"
   ]
 }
 </script>
@@ -80,7 +76,8 @@
     <p class="hero-eyebrow"><strong>Naresh Kumar</strong> · GPU cluster networking &amp; distributed-training infrastructure</p>
     <h1 class="hero-title">A GPU cluster is only as fast as its <em class="alt">slowest link</em> and as reliable as its <em>weakest</em>. I make it lose less time to both.</h1>
     <p class="hero-bio">
-      <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">~9 years</a> below the framework layer:
+      <!-- TODO(naresh): "~9 years" used to link to LinkedIn (removed Nov 2026). Link evidence or cut. -->
+      ~9 years below the framework layer:
       kernel networking, RDMA/RoCE, DPDK, SR-IOV, KVM and NCCL. Now applying it to the two problems that
       decide what a training or inference cluster actually delivers: reliability and efficiency at scale.
     </p>
@@ -90,10 +87,8 @@
       <span class="chip lead">NCCL</span>
       <span class="chip lead">RDMA / RoCE v2</span>
       <span class="chip">Disaggregated inference</span>
-      <span class="chip">DPDK</span>
-      <span class="chip">SR-IOV / KVM</span>
-      <span class="chip">eBPF / XDP</span>
-      <span class="chip">Linux kernel</span>
+      <span class="chip">DPDK · SR-IOV · KVM</span>
+      <span class="chip">Linux kernel · eBPF / XDP</span>
     </div>
     <div class="hero-cta">
       <a href="#work" class="btn btn-primary">See the work →</a>
@@ -133,10 +128,10 @@
     <div class="proof-fact">kvwire: RDMA KV-cache transport for disaggregated inference</div>
     <div class="proof-sub">vLLM KV-connector plug-in. M1 in progress.</div>
   </a>
-  <a class="card proof-item reveal" href="https://github.com/nareshns2004/infra-incident-intel" target="_blank" rel="noopener">
-    <div class="proof-kicker"><span>Repo · Hugging Face</span><span>↗</span></div>
-    <div class="proof-fact">infra-incident-intel: two models that learn goodput’s fault signatures</div>
-    <div class="proof-sub">Data contract &amp; verifiers public · 48 tests · 2 Spaces reserved</div>
+  <a class="card proof-item reveal" href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">
+    <div class="proof-kicker"><span>Model · Hugging Face</span><span>↗</span></div>
+    <div class="proof-fact">qwen3-nccl-rca-lora: grounded root-cause analysis for NCCL incidents</div>
+    <div class="proof-sub">Model card public · weights after goodput’s labeled data</div>
   </a>
 </section>
 
@@ -157,14 +152,12 @@
         <div><dt>Why it’s hard</dt><dd>Symptoms are global and causes are local. Stock tooling detects in minutes, attributes nothing, and restarts the whole job, sometimes onto the same broken hardware.</dd></div>
         <div><dt>Approach</dt><dd>Inject faults with a ground-truth ledger, capture NCCL flight-recorder signatures, and correlate them with DCGM and NIC telemetry to name the <strong>culprit rank and component</strong>. Correct attribution makes small recoveries safe: re-init communicators in-process, replace one node, or restore from a peer’s in-memory checkpoint.</dd></div>
         <div><dt>Status</dt><dd><span class="status status-wip">M1 of 6 · in progress</span> &nbsp;No results measured yet; every future number will link to a run.</dd></div>
-        <div><dt>Models</dt><dd>The injector’s ledger labels every incident by construction. That data trains two Hugging Face models that plug back in as goodput’s classifier: a <strong>calibrated, evidence-citing triage tier</strong> (ModernBERT, milliseconds on CPU) and a <strong>grounded root-cause tier</strong> (Qwen3 + LoRA, RL on rewards a script can check). To take the slot, they must beat goodput’s own rules. <span class="status status-wip">scaffold</span></dd></div>
+        <div><dt>Models</dt><dd>The injector’s ledger labels every incident by construction. That data trains two Hugging Face models that plug back in as goodput’s classifier: a <strong>calibrated, evidence-citing triage tier</strong> (ModernBERT, milliseconds on CPU) and a <strong>grounded root-cause tier</strong> (Qwen3 + LoRA, RL on rewards a script can check). To take the slot, they must beat goodput’s own rules. <span class="status status-early">design</span></dd></div>
       </dl>
       <div class="problem-links">
         <a class="primary" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">Repo ↗</a>
         <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof ↗</a>
-        <a href="https://github.com/nareshns2004/infra-incident-intel" target="_blank" rel="noopener">infra-incident-intel ↗</a>
-        <a href="https://huggingface.co/spaces/nareshns2004/infra-triage-demo" target="_blank" rel="noopener">Triage Space ↗</a>
-        <a href="https://huggingface.co/spaces/nareshns2004/infra-rca-demo" target="_blank" rel="noopener">RCA Space ↗</a>
+        <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">RCA model card ↗</a>
         <a href="posts/ring-allreduce-failure.html">Post: ring under failure</a>
         <a href="posts/nccl-timeout-triage.html">Post: NCCL triage</a>
         <a href="posts/checkpoint-interval.html">Post: checkpoint interval</a>
@@ -194,8 +187,8 @@
 <section class="section" id="writing">
   <div class="section-head">
     <p class="section-kicker">Writing</p>
-    <h2 class="section-title">Simulators, capacity models &amp; essays</h2>
-    <p class="section-lede">Each simulator runs in the browser: break a ring, size a KV transfer, freeze a fabric. Every model is labeled with its assumptions. Long-form essays live on Substack.</p>
+    <h2 class="section-title">Simulators &amp; capacity models</h2>
+    <p class="section-lede">Each simulator runs in the browser: break a ring, size a KV transfer, freeze a fabric. Every model states its assumptions.</p>
   </div>
   <div class="writing-grid" id="writing-grid">
     <noscript><ul>
@@ -206,7 +199,6 @@
       <li><a href="posts/nccl-timeout-triage.html">Reading the crime scene: triaging an NCCL timeout</a></li>
       <li><a href="posts/packet-path.html">The packet path: kernel stack vs XDP vs DPDK vs RDMA</a></li>
       <li><a href="posts/rail-topology.html">Where NCCL traffic actually goes: rail-optimized vs fat-tree</a></li>
-      <li><a href="https://substack.com/@nareshns2004">Essays on Substack</a></li>
     </ul></noscript>
   </div>
 </section>
@@ -278,19 +270,11 @@
           <a href="https://github.com/nareshns2004/kernel-level-ai-traffic-shaper" target="_blank" rel="noopener">kernel-level-ai-traffic-shaper ↗</a>
           <a href="posts/packet-path.html">packet path post</a></td></tr>
         <tr><td>DPDK</td><td>write-up</td><td>
-          <a href="https://nareshns2004.substack.com/p/intels-dpdk-the-userspace-data-plane" target="_blank" rel="noopener">DPDK essay ↗</a>
           <a href="posts/packet-path.html">packet path post</a></td></tr>
-        <tr><td>Virtualization (SR-IOV / KVM)</td><td>write-up</td><td>
-          <a href="https://nareshns2004.substack.com/p/virtualization-the-foundation-of" target="_blank" rel="noopener">Virtualization essay ↗</a>
-          <!-- TODO(naresh): link SR-IOV/KVM work evidence (repo, talk, or post) --></td></tr>
+        <!-- TODO(naresh): Virtualization (SR-IOV / KVM) row removed with the Substack essay; re-add with a repo, talk or post. -->
         <tr><td>Incident triage models</td><td>design</td><td>
-          <a href="https://github.com/nareshns2004/infra-incident-intel" target="_blank" rel="noopener">infra-incident-intel ↗</a>
-          <a href="https://huggingface.co/spaces/nareshns2004/infra-triage-demo" target="_blank" rel="noopener">triage Space ↗</a>
-          <a href="https://huggingface.co/spaces/nareshns2004/infra-rca-demo" target="_blank" rel="noopener">RCA Space ↗</a></td></tr>
-        <tr><td>ML for infra ops</td><td>design</td><td>
-          <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">6 HF model cards ↗</a>
-          <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">6 HF Spaces ↗</a>
-          <!-- TODO(naresh): the 6 model repos hold a README only. Upload weights + eval to call them published. --></td></tr>
+          <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">qwen3-nccl-rca-lora model card ↗</a>
+          <a href="posts/nccl-timeout-triage.html">NCCL triage post</a></td></tr>
       </tbody>
     </table>
   </div>
@@ -300,10 +284,9 @@
 <section class="section" id="profiles">
   <div class="section-head">
     <p class="section-kicker">Profiles</p>
-    <h2 class="section-title">Proof of work &amp; where to find me</h2>
+    <h2 class="section-title">Where the work lives</h2>
   </div>
 
-  <p class="profile-label">Technical proof of work</p>
   <div class="profiles-primary">
     <a class="card profile reveal" href="https://github.com/nareshns2004" target="_blank" rel="noopener" style="--pc:var(--ink)">
       <div class="profile-top"><div class="profile-badge">GH</div><div><div class="profile-name">GitHub</div><div class="profile-handle">@nareshns2004</div></div></div>
@@ -312,7 +295,7 @@
     </a>
     <a class="card profile reveal" href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener" style="--pc:var(--copper)">
       <div class="profile-top"><div class="profile-badge">HF</div><div><div class="profile-name">Hugging Face</div><div class="profile-handle">@nareshns2004</div></div></div>
-      <p class="profile-desc">Incident-triage and root-cause models for GPU clusters (Spaces reserved, training on goodput data next), plus inference lab Spaces.</p>
+      <p class="profile-desc">Root-cause models for GPU-cluster incidents. Model cards first; weights and evals once goodput’s labeled data lands.</p>
       <span class="profile-cta">View profile ↗</span>
     </a>
     <a class="card profile reveal" href="https://leetcode.com/u/nareshns2004/" target="_blank" rel="noopener" style="--pc:var(--signal)">
@@ -322,12 +305,6 @@
     </a>
   </div>
 
-  <p class="profile-label">Social &amp; writing</p>
-  <div class="profiles-social">
-    <a class="card social" href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn <span>/in/nareshns2004 ↗</span></a>
-    <a class="card social" href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack <span>@nareshns2004 ↗</span></a>
-    <a class="card social" href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X <span>@naresh_swe24 ↗</span></a>
-  </div>
 </section>
 
 <!-- CONTACT -->
@@ -341,7 +318,7 @@
     </div>
     <div class="contact-cta">
       <a href="mailto:nareshns2004@gmail.com?subject=Opportunity%20for%20Naresh" class="btn btn-primary">Email me →</a>
-      <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener" class="btn btn-outline">LinkedIn ↗</a>
+      <a href="https://github.com/nareshns2004" target="_blank" rel="noopener" class="btn btn-outline">GitHub ↗</a>
     </div>
   </div>
 </section>
@@ -354,9 +331,7 @@
     <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
     <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
     <a href="https://leetcode.com/u/nareshns2004/" target="_blank" rel="noopener">LeetCode</a>
-    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
-    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
+    <a href="#top">Back to top ↑</a>
   </div>
 </footer>
 

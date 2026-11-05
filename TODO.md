@@ -24,7 +24,14 @@ Backlog from CLAUDE.md, ordered by impact.
 - [ ] When `infra-failure-bench` or the triage model is published on the Hub, link it directly from the Reliability block and Foundations.
 - [x] Nov 2026 refresh: removed LinkedIn, Substack and X site-wide; removed dead links (infra-incident-intel repo 404, infra-triage-demo / infra-rca-demo Spaces, NCCL-RCA model) and pointed them at the `qwen3-nccl-rca-lora` model card; dropped the false "6 model cards / 6 Spaces" row; numbered section kickers, wider featured posts, card hover, balanced headings.
 
+- [x] **Nov 2026 security refresh** (`feature/secure-ai-infra`): new hero line ("can’t be stalled, slowed, or stolen"; 3 options in an HTML comment), "NK" brand replaces `naresh.infra`, Trust-at-scale block, §Security threat map + incident ticker, five security posts (breach field guide, agent blast radius, pickle disassembler, RDMA trust model, prefix-cache side channel), Toolbox with security rows, socials row (LinkedIn, Substack, YouTube, Docker Hub, X), ⌘K palette, writing filters, hero intruder phase + terminal, OG image re-rendered.
+- [ ] Add the security posts' one-line claims to goodput / kvwire READMEs where they belong (e.g. goodput RCA tier "recommends, never acts" is marked planned on the site; land it in the repo's design docs).
+- [ ] When kvwire decides ADR-0005 (memory-window fencing), update the Trust block and the RDMA post with the measured bind cost.
+- [ ] Profile README badge still says `naresh.infra`; rename to match the site.
+
 ## Open questions for Naresh
+
+- **Toolbox list:** the AI-infra-security tool list (SPIFFE/SPIRE, Falco/Tetragon, Sigstore/SLSA, confidential computing…) was added in the Nov 2026 refresh. Prune anything you can't defend in an interview.
 
 - **vLLM PR #50618**: on GitHub it's by JohnQinAMD and unmerged. Did you contribute under another account, or is it a different PR number? Send the link and it becomes the first proof item.
 - Links for the **cudagraph padding issue** and the **libbpf BTF fix**, if they exist.
@@ -33,4 +40,4 @@ Backlog from CLAUDE.md, ordered by impact.
 - **"~9 years"** in the hero bio linked to LinkedIn; now unlinked with a `TODO(naresh)`. Link evidence or cut.
 - The removed write-ups (DPDK, virtualization, LLM OS, AI infra roadmap essays; XDP / DPDK PMD / RDMA / RoCE / SR-IOV drafts): rebuild any worth keeping as an on-site post, or add as `kind: "external"` in `data.js`.
 
-Next session starts with: open questions above (vLLM PR link); then fix the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl that the site links to.
+Next session starts with: review the Vercel preview of `feature/secure-ai-infra` and prune the Toolbox list; then the open questions above (vLLM PR link) and the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl.

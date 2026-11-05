@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your prompt cache is a side channel — Naresh Kumar</title>
+<meta name="description" content="Prefix caching in LLM serving makes a cache hit measurably faster. An interactive model of an attacker timing time-to-first-token to learn another tenant&#x27;s prompt, how block size, noise and averaging change the odds, and how per-tenant cache salting closes it.">
+<meta name="author" content="Naresh Kumar">
+<link rel="canonical" href="https://portfolio-webapp-roan.vercel.app/posts/prefix-cache-side-channel.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your prompt cache is a side channel">
+<meta property="og:description" content="A cache hit is a faster time-to-first-token. Simulate an attacker learning another tenant&#x27;s prompt from it, then salt the cache.">
+<meta property="og:url" content="https://portfolio-webapp-roan.vercel.app/posts/prefix-cache-side-channel.html">
+<meta property="og:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@naresh_swe24">
+<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
+<script>try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="icon" href="../assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/post.css">
+<style>.scenario { font-size: 0.8rem; color: var(--text-mid); background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; display: grid; gap: 0.35rem; }
+  .scenario code { font-family: var(--font-mono); }
+  .scenario .who { display: inline-block; width: 6.5rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .scenario .who.a { color: var(--signal); } .scenario .who.b { color: var(--fault); }
+  .scenario b { color: var(--text); }
+  .bar-miss { fill: var(--signal); opacity: 0.75; } .bar-hit { fill: var(--fault); opacity: 0.75; }
+  .ax { stroke: var(--border-bright); } .ax-t { fill: var(--text-dim); font-size: 10px; }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Your prompt cache is a side channel", "author": {"@type": "Person", "name": "Naresh Kumar", "url": "https://portfolio-webapp-roan.vercel.app/"}, "datePublished": "2026-11-05", "keywords": "LLM security, prefix caching, KV cache, timing side channel, vLLM cache_salt, multi-tenant inference"}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../index.html"><span class="brand-mark" aria-hidden="true">NK</span>Naresh Kumar</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="../index.html#work">Work</a></li>
+      <li><a href="../index.html#security">Security</a></li>
+      <li><a href="../index.html#writing">Writing</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main" class="post">
+<a class="post-back" href="../index.html#writing">← All writing</a>
+  <header class="post-head">
+    <div class="chips"><span class="chip chip-fault">Security</span><span class="chip">Efficiency</span><span class="chip">▶ Interactive</span></div>
+    <h1>Your prompt cache is a side channel</h1>
+    <p class="post-dek">Automatic prefix caching is one of the best efficiency wins in LLM serving: if a new request starts with tokens the server has already prefilled, it reuses their KV blocks. Across tenants, that speed-up is also a signal.</p>
+    <p class="post-byline">Naresh Kumar · Nov 2026 · 7 min read</p>
+  </header>
+
+  <aside class="tldr">
+    <strong>TL;DR</strong>
+    <ul>
+      <li>A prefix-cache hit skips prefill for the matched blocks, so time-to-first-token (TTFT) drops. If tenant B can send prompts that might share a prefix with tenant A’s, B can test guesses about A’s prompt by timing them (<a href="https://arxiv.org/abs/2409.20002" target="_blank" rel="noopener">Early Bird</a>).</li>
+      <li>It isn’t theoretical: vLLM fixed a timing side channel in chunk-based prefix caching (<a href="https://github.com/advisories/GHSA-4qjh-9fv9-r85r" target="_blank" rel="noopener">CVE-2025-46570</a>), and supports a per-request <code>cache_salt</code> that isolates reuse.</li>
+      <li>Block granularity and noise make it hard to <em>read</em> arbitrary text, but easy to <em>confirm</em> a guess from a small candidate set: a customer name, a template field, a document someone else just uploaded.</li>
+    </ul>
+  </aside>
+
+  <figure class="widget" aria-labelledby="w-pc">
+    <div class="widget-head">
+      <span class="widget-title" id="w-pc">Distinguishing a cache hit from TTFT</span>
+      <span class="widget-hint">Gaussian noise model · samples are simulated</span>
+    </div>
+    <div class="scenario mono" aria-label="Scenario">
+      <div><span class="who a">tenant A</span> system prompt: <code>…support assistant for <b class="secret" id="secret">Contoso</b>. Escalate to…</code></div>
+      <div><span class="who b">attacker B</span> probes: <code>…support assistant for <b id="guess">{candidate}</b>. Escalate to…</code> and times TTFT</div>
+    </div>
+    <div class="controls">
+      <div class="control"><label for="blk">KV block size <output for="blk"></output></label><input type="range" id="blk" min="0" max="3" step="1" value="1"></div>
+      <div class="control"><label for="tok">Prefill cost / token <output for="tok"></output></label><input type="range" id="tok" min="0" max="7" step="1" value="3"></div>
+      <div class="control"><label for="sig">Timing noise σ <output for="sig"></output></label><input type="range" id="sig" min="0" max="7" step="1" value="4"></div>
+      <div class="control"><label for="n">Probes per candidate <output for="n"></output></label><input type="range" id="n" min="0" max="7" step="1" value="3"></div>
+      <div class="control"><label for="cand">Candidate set size <output for="cand"></output></label><input type="range" id="cand" min="0" max="6" step="1" value="2"></div>
+    </div>
+    <div class="btn-row">
+      <button class="wbtn" type="button" id="salt" aria-pressed="false">Per-tenant cache_salt: off</button>
+      <button class="wbtn" type="button" id="resample">↻ Resample</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Hit saves</div><div class="stat-value" id="o-d">–</div></div>
+      <div class="stat"><div class="stat-label">Separation d′</div><div class="stat-value" id="o-dp">–</div><div class="stat-sub">Δ / (σ/√n)</div></div>
+      <div class="stat"><div class="stat-label">Per-guess AUC</div><div class="stat-value" id="o-auc">–</div><div class="stat-sub">0.5 = coin flip</div></div>
+      <div class="stat"><div class="stat-label">P(attacker names it)</div><div class="stat-value" id="o-p">–</div><div class="stat-sub" id="o-req"></div></div>
+    </div>
+    <svg id="h" viewBox="0 0 720 250" role="img" aria-label="Histograms of averaged TTFT for cache hits and misses"></svg>
+    <div class="legend"><span><i style="background:var(--signal)"></i>miss: wrong guess, full prefill</span><span><i style="background:var(--fault)"></i>hit: right guess, block reused</span></div>
+    <p class="callout" id="note"></p>
+  </figure>
+
+  <div class="prose">
+    <h2>Why block size matters, and why it isn’t a defence</h2>
+    <p>Prefix caches work in fixed-size blocks: a block is reused only if <em>every</em> token in it, and every token before it, matches. With a block of 16 tokens, an attacker can’t learn a prompt one token at a time; each test is all-or-nothing for 16 tokens. That makes reading free text impractical. It does nothing against <strong>confirmation</strong>: when the attacker knows the template and only one field is secret, each candidate fills the block, and the hit-or-miss answer is exactly what they need. Larger blocks even make each hit save <em>more</em> time, as the calculator shows.</p>
+
+    <h2>The fix is an isolation boundary, not a smaller signal</h2>
+    <p>Noise and rate limits only raise the number of probes, and averaging beats noise at <code>√n</code>. The structural fix is to make cross-tenant hits impossible: include a per-tenant secret in the cache key. vLLM’s design supports exactly this: a <code>cache_salt</code> on the request is <a href="https://docs.vllm.ai/en/latest/design/prefix_caching.html" target="_blank" rel="noopener">injected into the hash of the first block</a>, so only requests with the same salt can reuse each other’s KV blocks. Turn it on above: the two distributions become one.</p>
+    <p>What it costs is the efficiency of cross-tenant sharing, which in a multi-tenant service you mostly shouldn’t have been relying on. Tenants still share the system prompts they themselves repeat. It’s the same trade as everywhere else on this site: <strong>a performance optimisation that crosses a trust boundary is a channel across that boundary.</strong></p>
+    <ul>
+      <li>Salt per tenant (or per trust domain), derived server-side; never accept the salt from the client as the only isolation.</li>
+      <li>Treat shared-cache features (prefix caching, KV offload to shared tiers, disaggregated KV transfer) as multi-tenant data stores in the threat model.</li>
+      <li>Don’t rely on TTFT jitter as protection. Measure the separation on your own stack with probes like these before deciding it’s too small to matter.</li>
+    </ul>
+  </div>
+
+  <aside class="assumptions">
+    <h2>Model &amp; assumptions</h2>
+    <ul>
+      <li>TTFT = constant + (uncached tokens × prefill cost per token) + Gaussian noise σ. A correct guess saves exactly one block of prefill: Δ = block size × cost per token. Prefill cost per token varies with model, GPU and batch; the slider range is illustrative, not a measurement.</li>
+      <li>The attacker averages <code>n</code> probes per candidate (so noise is σ/√n) and names the candidate with the lowest mean TTFT. P(correct) = ∫ φ(x) · Φ(x + d′)<sup>N−1</sup> dx for N candidates, computed numerically. The histograms are random draws from the same model.</li>
+      <li>The attacker’s probes hit the victim’s cached block only if it is still resident (not evicted) and no salt separates tenants. Eviction, batching effects and scheduler noise are folded into σ.</li>
+      <li>With a per-tenant salt, the attacker’s requests can never match the victim’s blocks: Δ = 0, AUC = 0.5 and P(correct) = 1/N.</li>
+    </ul>
+  </aside>
+
+  <section class="post-end">
+    <h2>Keep going</h2>
+    <div class="post-end-grid">
+      <a class="card" href="kv-cache-transfer.html"><div class="k">Related · interactive</div><div class="v">The KV-cache bill: what disaggregated inference has to move</div></a>
+      <a class="card" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: KV-cache transport for disaggregated inference ↗</div></a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© Naresh Kumar · <a href="../index.html">Home</a> · press <kbd>⌘K</kbd> to jump</span>
+  <div class="footer-links">
+    <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
+    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
+  </div>
+</footer>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/post.js"></script>
+<script>
+(function () {
+  const BLK = [1, 16, 32, 64], TOK = [5, 10, 20, 40, 80, 150, 300, 600], SIG = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25], NP = [1, 2, 4, 8, 16, 32, 64, 128];
+  const CAND = [2, 5, 10, 50, 100, 1000, 10000];
+  const NAMES = ['Fabrikam', 'Northwind', 'Contoso', 'Tailspin', 'Litware', 'Adatum', 'Woodgrove', 'Proseware'];
+  let salt = false;
+  const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)); const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+  const Phi = x => 0.5 * (1 + erf(x / Math.SQRT2));
+  const phi = x => Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI);
+  function pCorrect(dp, N) {
+    if (N <= 1) return 1;
+    let s = 0; const h = 0.02;
+    for (let x = -8; x <= 8 + dp; x += h) s += phi(x) * Math.pow(Phi(x + dp), N - 1) * h;
+    return Math.min(1, s);
+  }
+  let seed = 1;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const gauss = () => { let u = 0; while (!u) u = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd()); };
+  const svg = P.$('#h');
+  function update() {
+    const B = BLK[+P.$('#blk').value], t = TOK[+P.$('#tok').value] * 1e-6, sg = SIG[+P.$('#sig').value] * 1e-3, n = NP[+P.$('#n').value], N = CAND[+P.$('#cand').value];
+    const delta = salt ? 0 : B * t, se = sg / Math.sqrt(n), dp = delta / se;
+    const auc = Phi(dp / Math.SQRT2), pc = salt ? 1 / N : pCorrect(dp, N);
+    P.$('#o-d').textContent = salt ? '0 (no cross-tenant hit)' : P.seconds(delta);
+    P.$('#o-dp').textContent = dp.toFixed(2);
+    const a = P.$('#o-auc'); a.textContent = auc.toFixed(3); a.className = 'stat-value ' + (auc < 0.6 ? 'good' : auc < 0.9 ? 'warn' : 'bad');
+    const p = P.$('#o-p'); p.textContent = `${(100 * pc).toFixed(pc < 0.01 ? 2 : 1)}%`; p.className = 'stat-value ' + (pc <= 2 / N ? 'good' : pc < 0.5 ? 'warn' : 'bad');
+    P.$('#o-req').textContent = `${P.num(N * n)} requests · chance = ${(100 / N).toFixed(N > 100 ? 2 : 1)}%`;
+    P.$('#guess').textContent = NAMES[Math.floor(rnd() * NAMES.length)];
+    // histograms of averaged TTFT (relative to the miss mean, in units of the miss distribution)
+    const K = 600, miss = [], hit = [];
+    for (let i = 0; i < K; i++) { miss.push(gauss() * se); hit.push(-delta + gauss() * se); }
+    const lo = Math.min(-delta - 4 * se, -4 * se), hi = 4 * se, BINS = 48, w = (hi - lo) / BINS;
+    const hm = Array(BINS).fill(0), hh = Array(BINS).fill(0);
+    miss.forEach(v => hm[Math.max(0, Math.min(BINS - 1, Math.floor((v - lo) / w)))]++);
+    hit.forEach(v => hh[Math.max(0, Math.min(BINS - 1, Math.floor((v - lo) / w)))]++);
+    const max = Math.max(...hm, ...hh), X0 = 40, X1 = 700, Y0 = 14, Y1 = 210, bw = (X1 - X0) / BINS;
+    svg.innerHTML = '';
+    P.svg('line', { x1: X0, y1: Y1, x2: X1, y2: Y1, class: 'ax' }, svg);
+    for (let i = 0; i < BINS; i++) {
+      const hM = hm[i] / max * (Y1 - Y0), hH = hh[i] / max * (Y1 - Y0);
+      P.svg('rect', { x: X0 + i * bw + 1, y: Y1 - hM, width: bw - 2, height: hM, class: 'bar-miss' }, svg);
+      P.svg('rect', { x: X0 + i * bw + 1, y: Y1 - hH, width: bw - 2, height: hH, class: 'bar-hit' }, svg);
+    }
+    for (let k = 0; k <= 4; k++) {
+      const v = lo + (hi - lo) * k / 4;
+      P.svg('text', { x: X0 + (X1 - X0) * k / 4, y: Y1 + 16, 'text-anchor': k === 0 ? 'start' : k === 4 ? 'end' : 'middle', class: 'ax-t' }, svg).textContent = (v >= 0 ? '+' : '') + P.seconds(Math.abs(v)).replace(/^/, v < 0 ? '−' : '');
+    }
+    P.svg('text', { x: (X0 + X1) / 2, y: Y1 + 34, 'text-anchor': 'middle', class: 'ax-t' }, svg).textContent = `mean TTFT over ${n} probe${n > 1 ? 's' : ''}, relative to a miss`;
+    P.$('#salt').textContent = `Per-tenant cache_salt: ${salt ? 'on' : 'off'}`;
+    P.$('#note').innerHTML = salt
+      ? '<b>Salted:</b> the attacker’s requests hash to different blocks than tenant A’s, so a correct guess is a miss too. The distributions coincide and the attacker is reduced to chance.'
+      : dp > 3 ? `<b>Separable:</b> each correct guess is ${P.seconds(delta)} faster on average, against ${P.seconds(se)} of averaged noise. With ${P.num(N * n)} requests the attacker names the secret ${(100 * pc).toFixed(0)}% of the time.`
+      : `<b>Noisy, not safe:</b> raise “probes per candidate”. Averaging shrinks noise by √n, so a patient attacker wins eventually unless the cache is isolated.`;
+  }
+  ['blk', 'tok', 'sig', 'n', 'cand'].forEach(id => P.bind(id, v => id === 'blk' ? `${BLK[v]} tokens` : id === 'tok' ? `${TOK[v]} µs` : id === 'sig' ? `${SIG[v]} ms` : id === 'n' ? NP[v] : P.num(CAND[v]), update));
+  P.$('#salt').addEventListener('click', () => { salt = !salt; P.$('#salt').setAttribute('aria-pressed', String(salt)); update(); });
+  P.$('#resample').addEventListener('click', () => { seed = (seed * 48271) % 2147483647 || 7; update(); });
+  update();
+})();
+</script>
+</body>
+</html>

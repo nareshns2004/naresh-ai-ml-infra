@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pickle is a program: loading a checkpoint is running code — Naresh Kumar</title>
+<meta name="description" content="A pickle disassembler in the browser: step a PyTorch-style checkpoint through the unpickler&#x27;s stack machine, scan its imports against a weights-only allowlist, see why grep-based scanners miss payloads, and compare with a safetensors header.">
+<meta name="author" content="Naresh Kumar">
+<link rel="canonical" href="https://portfolio-webapp-roan.vercel.app/posts/pickle-is-a-program.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pickle is a program: loading a checkpoint is running code">
+<meta property="og:description" content="A PyTorch checkpoint is a program for a stack machine that can import and call anything. Disassemble one in your browser.">
+<meta property="og:url" content="https://portfolio-webapp-roan.vercel.app/posts/pickle-is-a-program.html">
+<meta property="og:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@naresh_swe24">
+<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
+<script>try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="icon" href="../assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/post.css">
+<style>#v-load { overflow-wrap: anywhere; }
+  .verdicts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.75rem; margin: 0.9rem 0; }
+  .pk-wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1rem; }
+  @media (max-width: 700px) { .pk-wrap { grid-template-columns: 1fr; } }
+  .pk-h { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem; }
+  .pk-ops, .pk-stack { list-style: none; font-family: var(--font-mono); font-size: 0.74rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; height: 320px; overflow-y: auto; padding: 0.35rem 0; }
+  .pk-ops:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pk-ops li { display: grid; grid-template-columns: 3rem 9.5rem 1fr; gap: 0.4rem; padding: 0.08rem 0.7rem; color: var(--text-mid); cursor: pointer; white-space: nowrap; }
+  .pk-ops li .o { color: var(--text-dim); }
+  .pk-ops li .a { overflow: hidden; text-overflow: ellipsis; }
+  .pk-ops li.cur { background: var(--paper); box-shadow: inset 3px 0 0 var(--ink); color: var(--text); }
+  .pk-ops li.past { color: var(--text); }
+  .pk-ops li.imp .n { color: var(--signal); font-weight: 600; }
+  .pk-ops li.bad .n, .pk-ops li.bad .a { color: var(--fault); font-weight: 600; }
+  .pk-stack li { padding: 0.15rem 0.7rem; border-bottom: 1px dashed var(--border); color: var(--text); white-space: pre-wrap; word-break: break-all; }
+  .pk-stack li.mark { color: var(--text-dim); }
+  .pk-stack li.call { color: var(--copper); }
+  .pk-stack li.badcall { color: var(--fault); font-weight: 600; }
+  .pk-imports { list-style: none; font-family: var(--font-mono); font-size: 0.76rem; }
+  .pk-imports li.ok::before { content: '✓ '; color: var(--signal); }
+  .pk-imports li.bad { color: var(--fault); font-weight: 600; }
+  .pk-imports li.bad::before { content: '✗ '; }
+  .st-hdr { font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem; white-space: pre-wrap; color: var(--text-mid); }
+  .st-tab { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78rem; margin-top: 0.6rem; }
+  .st-tab th, .st-tab td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+  .st-tab th { color: var(--text-dim); font-weight: 400; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .hex summary { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); cursor: pointer; margin-top: 0.8rem; }
+  .hex pre { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-mid); background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem; max-height: 220px; overflow: auto; margin-top: 0.5rem; }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Pickle is a program: loading a checkpoint is running code", "author": {"@type": "Person", "name": "Naresh Kumar", "url": "https://portfolio-webapp-roan.vercel.app/"}, "datePublished": "2026-11-05", "keywords": "pickle security, PyTorch checkpoint, safetensors, model supply chain, CVE-2025-32434, CVE-2025-32444, torch.load weights_only"}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../index.html"><span class="brand-mark" aria-hidden="true">NK</span>Naresh Kumar</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="../index.html#work">Work</a></li>
+      <li><a href="../index.html#security">Security</a></li>
+      <li><a href="../index.html#writing">Writing</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main" class="post">
+<a class="post-back" href="../index.html#writing">← All writing</a>
+  <header class="post-head">
+    <div class="chips"><span class="chip chip-fault">Security</span><span class="chip">▶ Interactive</span><span class="chip">Runs entirely in your browser</span></div>
+    <h1>Pickle is a program: loading a checkpoint is running code</h1>
+    <p class="post-dek">A classic PyTorch <code>.pt</code> file isn’t data with a format. It’s a zip with a <code>data.pkl</code> inside, and a pickle is a program for a small stack machine whose instruction set includes “import any function” and “call it”.</p>
+    <p class="post-byline">Naresh Kumar · Nov 2026 · 9 min read</p>
+  </header>
+
+  <aside class="tldr">
+    <strong>TL;DR</strong>
+    <ul>
+      <li>Two opcodes make pickle dangerous: <code>GLOBAL</code> / <code>STACK_GLOBAL</code> import a callable by name, and <code>REDUCE</code> calls it. Every honest PyTorch checkpoint uses both, to rebuild tensors.</li>
+      <li>So you can’t ban the opcodes. You can only <b>allowlist the callables</b>, which is what <code>torch.load(weights_only=True)</code> does, and allowlists in a Turing-capable format have bypasses (<a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32434" target="_blank" rel="noopener">CVE-2025-32434</a>).</li>
+      <li><b>safetensors</b> removes the program: an 8-byte length, a JSON header, raw bytes. There is nothing to execute. For anything you didn’t produce, it’s the only format I’d load.</li>
+    </ul>
+  </aside>
+
+  <figure class="widget" aria-labelledby="w-pk">
+    <div class="widget-head">
+      <span class="widget-title" id="w-pk">Unpickler, one opcode at a time</span>
+      <span class="widget-hint">Disassembles and simulates; never executes anything</span>
+    </div>
+    <div class="btn-row" id="samples" role="toolbar" aria-label="Sample files">
+      <button class="wbtn" type="button" data-s="benign">state_dict (honest)</button>
+      <button class="wbtn danger" type="button" data-s="malicious">state_dict + payload</button>
+      <button class="wbtn danger" type="button" data-s="sneaky">obfuscated payload (protocol 4)</button>
+      <button class="wbtn" type="button" data-s="safetensors">same weights as safetensors</button>
+    </div>
+    <div class="verdicts">
+      <div class="stat"><div class="stat-label">Naive grep scanner</div><div class="stat-value" id="v-grep">–</div><div class="stat-sub" id="v-grep-sub"></div></div>
+      <div class="stat"><div class="stat-label">Opcode allowlist scan</div><div class="stat-value" id="v-ops">–</div><div class="stat-sub" id="v-ops-sub"></div></div>
+      <div class="stat"><div class="stat-label">What loading would do</div><div class="stat-value" id="v-load" style="font-size:.95rem">–</div></div>
+    </div>
+    <div class="pk-wrap" id="pk-wrap">
+      <div class="pk-col"><div class="pk-h">Opcodes <span id="pk-pos"></span></div><ol class="pk-ops" id="ops" tabindex="0" aria-label="Disassembly; use arrow keys to step"></ol></div>
+      <div class="pk-col"><div class="pk-h">Stack after this opcode</div><ol class="pk-stack" id="stack"></ol><div class="pk-h" style="margin-top:.8rem">Imports seen so far</div><ul class="pk-imports" id="imports"></ul></div>
+    </div>
+    <div class="st-wrap" id="st-wrap" hidden>
+      <div class="pk-h">safetensors header (parsed as JSON, never executed)</div>
+      <pre class="st-hdr" id="st-hdr"></pre>
+      <table class="st-tab"><thead><tr><th>tensor</th><th>dtype</th><th>shape</th><th>bytes</th></tr></thead><tbody id="st-rows"></tbody></table>
+    </div>
+    <div class="btn-row" id="stepper">
+      <button class="wbtn" type="button" id="b-first" aria-label="First opcode">|◀</button>
+      <button class="wbtn" type="button" id="b-prev" aria-label="Previous opcode">◀</button>
+      <button class="wbtn primary" type="button" id="b-play">▶ Run to first call</button>
+      <button class="wbtn" type="button" id="b-next" aria-label="Next opcode">▶</button>
+      <button class="wbtn" type="button" id="b-last" aria-label="Last opcode">▶|</button>
+    </div>
+    <details class="hex"><summary>Raw bytes (hex)</summary><pre id="hex"></pre></details>
+  </figure>
+
+  <div class="prose">
+    <h2>How an honest checkpoint already “runs code”</h2>
+    <p>Step through the honest sample. The very first instruction is <code>GLOBAL collections OrderedDict</code>, then <code>REDUCE</code> calls it. Each tensor is <code>GLOBAL torch._utils _rebuild_tensor_v2</code> applied to a storage reference that <code>BINPERSID</code> resolves out of the zip. Loading a state dict is a sequence of function calls chosen by the file. A malicious file just chooses different functions.</p>
+    <p>The payload sample adds one entry. Its value is <code>GLOBAL posix system</code> called with a shell command. On Linux, <code>os.system</code> pickles as <code>posix.system</code>, so a scanner that greps for <code>os.system</code> reports the file clean. The obfuscated sample goes further: under protocol 4, <code>STACK_GLOBAL</code> takes the module and name from two separate strings on the stack, and the argument assembles <code>'o'+'s'</code> at runtime. There’s no suspicious substring to find. Only following the opcodes, as the scanner here does, reveals <code>builtins.eval</code> being called.</p>
+
+    <h2>Why “safe mode” is not the fix</h2>
+    <p>An allowlist is the right idea if you must read pickle. <code>torch.load</code> now defaults to <code>weights_only=True</code>, which permits only tensor-rebuilding globals. But an allowlist in front of a stack machine is a sandbox, and sandboxes get bypassed: in PyTorch 2.5.1 and earlier, <code>weights_only=True</code> could still be driven to <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32434" target="_blank" rel="noopener">remote code execution</a>. The safe position is a format with no code path at all.</p>
+
+    <h2>It isn’t only files</h2>
+    <p>The same deserializer shows up on the wire. vLLM’s Mooncake integration moved KV-cache metadata between prefill and decode nodes with pickle over ZeroMQ sockets bound to every interface, which made it an <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32444" target="_blank" rel="noopener">unauthenticated RCE</a> on the inference fabric. And Wiz ran code inside <a href="https://www.wiz.io/blog/wiz-and-hugging-face-address-risks-to-ai-infrastructure" target="_blank" rel="noopener">Hugging Face’s inference infrastructure</a> simply by uploading a pickle model. It’s the rule I’m holding <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a>’s control path to as it’s built: KV transfer is a network service, so its metadata gets a fixed schema and a code-free encoding.</p>
+    <!-- TODO(naresh): record the code-free control-path encoding in kvwire docs/TRANSPORT.md, then link it here. -->
+
+    <h2>What I’d enforce</h2>
+    <ul>
+      <li><strong>Ingest:</strong> anything from outside the org is converted to <a href="https://huggingface.co/docs/safetensors/index" target="_blank" rel="noopener">safetensors</a> in an isolated, network-less sandbox, or rejected.</li>
+      <li><strong>Produce:</strong> checkpoints are written as safetensors (or a tensor-only sharded format), hashed per shard, and signed. Restores verify before reading a byte.</li>
+      <li><strong>Wire:</strong> no pickle on any socket, internal or not. Fixed schemas, authenticated peers, private interfaces.</li>
+      <li><strong>Legacy:</strong> where pickle is unavoidable, <code>weights_only=True</code> on a current PyTorch, inside a sandbox, with an opcode scan like this one in CI as a tripwire, not a guarantee.</li>
+    </ul>
+  </div>
+
+  <aside class="assumptions">
+    <h2>Model &amp; assumptions</h2>
+    <ul>
+      <li>The samples were produced by Python’s own <code>pickle</code> module, with stand-in classes that emit the same <code>GLOBAL</code> names a real <code>torch.save</code> <code>data.pkl</code> contains (protocol 2; protocol 4 for the obfuscated one). They were generated without ever being unpickled. The payload commands are inert strings pointing at <code>attacker.example</code>.</li>
+      <li>The disassembler implements the opcodes these files use, plus the common protocol 0–5 opcodes. It simulates the stack symbolically, with no evaluation. Unknown opcodes stop the walk and are reported.</li>
+      <li>The allowlist is a small subset in the spirit of <code>weights_only</code>: <code>collections.OrderedDict</code>, <code>torch._utils._rebuild_tensor_v2</code>, <code>torch._utils._rebuild_parameter</code>, <code>torch.Size</code> and the <code>torch.*Storage</code> types. It is illustrative, not PyTorch’s exact list.</li>
+      <li>The “naive grep” scanner looks for <code>os.system</code>, <code>subprocess</code>, <code>builtins.eval</code>, <code>builtins.exec</code> and <code>__builtin__</code> as substrings, the way a quick blocklist would.</li>
+    </ul>
+  </aside>
+
+  <section class="post-end">
+    <h2>Keep going</h2>
+    <div class="post-end-grid">
+      <a class="card" href="rdma-trust-model.html"><div class="k">Next · interactive</div><div class="v">The kernel can’t see your tensors: RDMA’s trust model</div></a>
+      <a class="card" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: KV-cache transport for disaggregated inference ↗</div></a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© Naresh Kumar · <a href="../index.html">Home</a> · press <kbd>⌘K</kbd> to jump</span>
+  <div class="footer-links">
+    <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
+    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
+  </div>
+</footer>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/post.js"></script>
+<script>
+(function () {
+  // Samples generated offline by Python's pickle module (see "Model & assumptions"). Never unpickled.
+  const B64 = {"benign": "gAJjY29sbGVjdGlvbnMKT3JkZXJlZERpY3QKcQApUnEBKFgJAAAAZmMud2VpZ2h0cQJjdG9yY2guX3V0aWxzCl9yZWJ1aWxkX3RlbnNvcl92MgpxAygoWAcAAABzdG9yYWdlcQRjdG9yY2gKRmxvYXRTdG9yYWdlCnEFWAEAAAAwcQZYAwAAAGNwdXEHSyB0cQhRSwBLBEsIhnEJSwhLAYZxColoAClScQt0cQxScQ1YBwAAAGZjLmJpYXNxDmgDKChoBGgFWAEAAAAxcQ9oB0sEdHEQUUsASwSFcRFLAYVxEoloAClScRN0cRRScRV1Lg==", "malicious": "gAJjY29sbGVjdGlvbnMKT3JkZXJlZERpY3QKcQApUnEBKFgJAAAAZmMud2VpZ2h0cQJjdG9yY2guX3V0aWxzCl9yZWJ1aWxkX3RlbnNvcl92MgpxAygoWAcAAABzdG9yYWdlcQRjdG9yY2gKRmxvYXRTdG9yYWdlCnEFWAEAAAAwcQZYAwAAAGNwdXEHSyB0cQhRSwBLBEsIhnEJSwhLAYZxColoAClScQt0cQxScQ1YBwAAAGZjLmJpYXNxDmgDKChoBGgFWAEAAAAxcQ9oB0sEdHEQUUsASwSFcRFLAYVxEoloAClScRN0cRRScRVYBQAAAF9tZXRhcRZjcG9zaXgKc3lzdGVtCnEXWCoAAABjdXJsIC1zIGh0dHBzOi8vYXR0YWNrZXIuZXhhbXBsZS94LnNoIHwgc2hxGIVxGVJxGnUu", "sneaky": "gASV4gAAAAAAAACMC2NvbGxlY3Rpb25zlIwLT3JkZXJlZERpY3SUk5QpUpQojAlmYy53ZWlnaHSUjAx0b3JjaC5fdXRpbHOUjBJfcmVidWlsZF90ZW5zb3JfdjKUk5QoKIwHc3RvcmFnZZSMBXRvcmNolIwMRmxvYXRTdG9yYWdllJOUjAEwlIwDY3B1lEsgdJRRSwBLBEsIhpRLCEsBhpSJaAIpUpR0lFKUjAJfdpSMCGJ1aWx0aW5zlIwEZXZhbJSTlIwgX19pbXBvcnRfXygnbycrJ3MnKS5zeXN0ZW0oJ2lkJymUhZRSlHUu", "safetensors": "oAAAAAAAAAB7Il9fbWV0YWRhdGFfXyI6eyJmb3JtYXQiOiJwdCJ9LCJmYy5iaWFzIjp7ImR0eXBlIjoiRjMyIiwic2hhcGUiOls0XSwiZGF0YV9vZmZzZXRzIjpbMCwxNl19LCJmYy53ZWlnaHQiOnsiZHR5cGUiOiJGMzIiLCJzaGFwZSI6WzQsOF0sImRhdGFfb2Zmc2V0cyI6WzE2LDE0NF19fSAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"};
+  const bytesOf = b => Uint8Array.from(atob(b), c => c.charCodeAt(0));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const ALLOW = new Set(['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch._utils._rebuild_parameter', 'torch.Size',
+    'torch.FloatStorage', 'torch.HalfStorage', 'torch.BFloat16Storage', 'torch.DoubleStorage', 'torch.LongStorage', 'torch.IntStorage', 'torch.ByteStorage', 'torch.BoolStorage']);
+  const NAIVE = ['os.system', 'subprocess', 'builtins.eval', 'builtins.exec', '__builtin__'];
+
+  // ── Disassembler + symbolic stack machine (no evaluation) ──
+  function disassemble(b) {
+    const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    const td = new TextDecoder('utf-8'), lat = new TextDecoder('latin1');
+    let p = 0;
+    const u8 = () => b[p++], u16 = () => { const v = dv.getUint16(p, true); p += 2; return v; };
+    const u32 = () => { const v = dv.getUint32(p, true); p += 4; return v; }, i32 = () => { const v = dv.getInt32(p, true); p += 4; return v; };
+    const u64 = () => { const v = Number(dv.getBigUint64(p, true)); p += 8; return v; };
+    const str = (n, dec = td) => { const s = dec.decode(b.subarray(p, p + n)); p += n; return s; };
+    const line = () => { let e = p; while (e < b.length && b[e] !== 10) e++; const s = lat.decode(b.subarray(p, e)); p = e + 1; return s; };
+    const stack = [], memo = {}, out = [];
+    let marks = [];
+    const S = v => ({ t: 'str', v }), N = v => ({ t: 'num', v });
+    const popMark = () => { const m = marks.pop(); return stack.splice(m); };
+    const R = {
+      0x80: ['PROTO', () => ({ arg: u8() })],
+      0x95: ['FRAME', () => ({ arg: u64() + ' bytes' })],
+      0x63: ['GLOBAL', () => { const m = line(), n = line(); stack.push({ t: 'global', q: m + '.' + n }); return { arg: m + ' ' + n, imp: m + '.' + n }; }],
+      0x93: ['STACK_GLOBAL', () => { const n = stack.pop(), m = stack.pop(); const q = (m && m.v) + '.' + (n && n.v); stack.push({ t: 'global', q }); return { arg: '(from stack) ' + q, imp: q }; }],
+      0x8c: ['SHORT_BINUNICODE', () => { const s = str(u8()); stack.push(S(s)); return { arg: JSON.stringify(s) }; }],
+      0x58: ['BINUNICODE', () => { const s = str(u32()); stack.push(S(s)); return { arg: JSON.stringify(s) }; }],
+      0x8d: ['BINUNICODE8', () => { const s = str(u64()); stack.push(S(s)); return { arg: JSON.stringify(s) }; }],
+      0x55: ['SHORT_BINSTRING', () => { const s = str(u8(), lat); stack.push(S(s)); return { arg: JSON.stringify(s) }; }],
+      0x54: ['BINSTRING', () => { const s = str(i32(), lat); stack.push(S(s)); return { arg: JSON.stringify(s) }; }],
+      0x43: ['SHORT_BINBYTES', () => { const n = u8(); p += n; stack.push({ t: 'bytes', n }); return { arg: n + ' bytes' }; }],
+      0x42: ['BINBYTES', () => { const n = u32(); p += n; stack.push({ t: 'bytes', n }); return { arg: n + ' bytes' }; }],
+      0x4b: ['BININT1', () => { const v = u8(); stack.push(N(v)); return { arg: v }; }],
+      0x4d: ['BININT2', () => { const v = u16(); stack.push(N(v)); return { arg: v }; }],
+      0x4a: ['BININT', () => { const v = i32(); stack.push(N(v)); return { arg: v }; }],
+      0x8a: ['LONG1', () => { const n = u8(); let v = 0n; for (let i = n - 1; i >= 0; i--) v = (v << 8n) | BigInt(b[p + i]); p += n; stack.push(N(String(v))); return { arg: String(v) }; }],
+      0x47: ['BINFLOAT', () => { const v = dv.getFloat64(p, false); p += 8; stack.push(N(v)); return { arg: v }; }],
+      0x4e: ['NONE', () => { stack.push({ t: 'lit', v: 'None' }); return {}; }],
+      0x88: ['NEWTRUE', () => { stack.push({ t: 'lit', v: 'True' }); return {}; }],
+      0x89: ['NEWFALSE', () => { stack.push({ t: 'lit', v: 'False' }); return {}; }],
+      0x28: ['MARK', () => { marks.push(stack.length); return {}; }],
+      0x29: ['EMPTY_TUPLE', () => { stack.push({ t: 'tuple', items: [] }); return {}; }],
+      0x85: ['TUPLE1', () => { stack.push({ t: 'tuple', items: stack.splice(-1) }); return {}; }],
+      0x86: ['TUPLE2', () => { stack.push({ t: 'tuple', items: stack.splice(-2) }); return {}; }],
+      0x87: ['TUPLE3', () => { stack.push({ t: 'tuple', items: stack.splice(-3) }); return {}; }],
+      0x74: ['TUPLE', () => { stack.push({ t: 'tuple', items: popMark() }); return {}; }],
+      0x7d: ['EMPTY_DICT', () => { stack.push({ t: 'dict', n: 0 }); return {}; }],
+      0x5d: ['EMPTY_LIST', () => { stack.push({ t: 'list', n: 0 }); return {}; }],
+      0x8f: ['EMPTY_SET', () => { stack.push({ t: 'set', n: 0 }); return {}; }],
+      0x73: ['SETITEM', () => { stack.splice(-2); const d = stack[stack.length - 1]; if (d) d.n = (d.n || 0) + 1; return {}; }],
+      0x75: ['SETITEMS', () => { const items = popMark(); const d = stack[stack.length - 1]; if (d) { d.n = (d.n || 0) + items.length / 2; d.keys = (d.keys || []).concat(items.filter((_, i) => i % 2 === 0).map(k => k.v)); } return { arg: items.length / 2 + ' items' }; }],
+      0x61: ['APPEND', () => { stack.pop(); const l = stack[stack.length - 1]; if (l) l.n = (l.n || 0) + 1; return {}; }],
+      0x65: ['APPENDS', () => { const items = popMark(); const l = stack[stack.length - 1]; if (l) l.n = (l.n || 0) + items.length; return { arg: items.length + ' items' }; }],
+      0x90: ['ADDITEMS', () => { const items = popMark(); const l = stack[stack.length - 1]; if (l) l.n = (l.n || 0) + items.length; return {}; }],
+      0x71: ['BINPUT', () => { const i = u8(); memo[i] = stack[stack.length - 1]; return { arg: i }; }],
+      0x72: ['LONG_BINPUT', () => { const i = u32(); memo[i] = stack[stack.length - 1]; return { arg: i }; }],
+      0x94: ['MEMOIZE', () => { const i = Object.keys(memo).length; memo[i] = stack[stack.length - 1]; return { arg: 'as ' + i }; }],
+      0x68: ['BINGET', () => { const i = u8(); stack.push(memo[i]); return { arg: i }; }],
+      0x6a: ['LONG_BINGET', () => { const i = u32(); stack.push(memo[i]); return { arg: i }; }],
+      0x51: ['BINPERSID', () => { const id = stack.pop(); stack.push({ t: 'persid', id }); return { arg: 'resolve storage from the archive' }; }],
+      0x52: ['REDUCE', () => { const args = stack.pop(), fn = stack.pop(); stack.push({ t: 'call', fn, args }); return { call: fn && fn.q, args }; }],
+      0x81: ['NEWOBJ', () => { const args = stack.pop(), cls = stack.pop(); stack.push({ t: 'call', fn: cls, args, kind: 'new' }); return { call: cls && cls.q, args }; }],
+      0x62: ['BUILD', () => { stack.pop(); return { arg: 'set object state' }; }],
+      0x30: ['POP', () => { stack.pop(); return {}; }],
+      0x32: ['DUP', () => { stack.push(stack[stack.length - 1]); return {}; }],
+      0x2e: ['STOP', () => ({ stop: true })],
+    };
+    const snap = () => stack.map(v => v);
+    while (p < b.length) {
+      const off = p, op = u8(), r = R[op];
+      if (!r) { out.push({ off, name: 'UNSUPPORTED 0x' + op.toString(16), arg: 'walk stopped', stack: snap(), bad: true }); break; }
+      let res;
+      try { res = r[1](); } catch (e) { out.push({ off, name: r[0], arg: 'malformed: ' + e.message, stack: snap(), bad: true }); break; }
+      out.push({ off, name: r[0], ...res, stack: snap() });
+      if (res.stop) break;
+    }
+    return out;
+  }
+
+  const show = v => {
+    if (!v) return '?';
+    switch (v.t) {
+      case 'str': return JSON.stringify(v.v.length > 48 ? v.v.slice(0, 45) + '…' : v.v);
+      case 'num': case 'lit': return String(v.v);
+      case 'bytes': return `<${v.n} bytes>`;
+      case 'global': return `‹${v.q}›`;
+      case 'tuple': return '(' + v.items.map(show).join(', ') + (v.items.length === 1 ? ',)' : ')');
+      case 'dict': return `{${v.n || 0} items${v.keys ? ': ' + v.keys.slice(0, 3).map(k => JSON.stringify(k)).join(', ') + (v.keys.length > 3 ? ', …' : '') : ''}}`;
+      case 'list': return `[${v.n || 0} items]`;
+      case 'set': return `{set of ${v.n || 0}}`;
+      case 'persid': return `storage(${show(v.id)})`;
+      case 'call': return `${v.fn && v.fn.q ? v.fn.q.split('.').pop() : '?'}${show(v.args)}`;
+      default: return '?';
+    }
+  };
+
+  let ops = [], cur = 0, name = 'benign', playT = null;
+  const $ops = P.$('#ops'), $stack = P.$('#stack');
+
+  function renderOps() {
+    $ops.innerHTML = ops.map((o, i) => {
+      const imp = o.imp, bad = (imp && !ALLOW.has(imp)) || (o.call && !ALLOW.has(o.call)) || o.bad;
+      const arg = o.call ? `call ‹${o.call}›${show(o.args)}` : o.arg !== undefined ? String(o.arg) : '';
+      return `<li data-i="${i}" class="${imp ? 'imp' : ''}${bad ? ' bad' : ''}"><span class="o">${o.off}</span><span class="n">${esc(o.name)}</span><span class="a" title="${esc(arg)}">${esc(arg)}</span></li>`;
+    }).join('');
+  }
+  function renderStep() {
+    P.$$('li', $ops).forEach((li, i) => { li.classList.toggle('cur', i === cur); li.classList.toggle('past', i < cur); });
+    const li = $ops.children[cur]; if (li) li.scrollIntoView({ block: 'nearest' });
+    const o = ops[cur];
+    $stack.innerHTML = o ? o.stack.map(v => {
+      const bad = v && v.t === 'call' && v.fn && !ALLOW.has(v.fn.q);
+      return `<li class="${v && v.t === 'call' ? (bad ? 'badcall' : 'call') : ''}">${esc(show(v))}</li>`;
+    }).reverse().join('') || '<li class="mark">(empty)</li>' : '';
+    const seen = [...new Set(ops.slice(0, cur + 1).filter(x => x.imp).map(x => x.imp))];
+    P.$('#imports').innerHTML = seen.map(q => `<li class="${ALLOW.has(q) ? 'ok' : 'bad'}">${esc(q)}${ALLOW.has(q) ? '' : ' (not allowlisted)'}</li>`).join('') || '<li>none yet</li>';
+    P.$('#pk-pos').textContent = `· ${cur + 1} / ${ops.length}`;
+  }
+  function verdict(b) {
+    const text = new TextDecoder('latin1').decode(b);
+    const hits = NAIVE.filter(s => text.includes(s));
+    const g = P.$('#v-grep');
+    g.textContent = hits.length ? 'flagged' : 'clean'; g.className = 'stat-value ' + (hits.length ? 'bad' : 'good');
+    P.$('#v-grep-sub').textContent = hits.length ? hits.join(', ') : 'no blocklisted substring found';
+    const badImp = [...new Set(ops.filter(o => o.imp && !ALLOW.has(o.imp)).map(o => o.imp))];
+    const calls = ops.filter(o => o.call && !ALLOW.has(o.call));
+    const v = P.$('#v-ops');
+    v.textContent = badImp.length ? `${badImp.length} unsafe import${badImp.length > 1 ? 's' : ''}` : 'allowlisted only';
+    v.className = 'stat-value ' + (badImp.length ? 'bad' : 'good');
+    P.$('#v-ops-sub').textContent = badImp.length ? badImp.join(', ') : `${new Set(ops.filter(o => o.imp).map(o => o.imp)).size} imports, all tensor rebuilding`;
+    const l = P.$('#v-load');
+    if (calls.length) { const c = calls[0]; l.textContent = `calls ${c.call}(${c.args && c.args.items ? c.args.items.map(show).join(', ') : ''})`; l.className = 'stat-value bad'; }
+    else { l.textContent = 'rebuilds tensors (calls trusted functions)'; l.className = 'stat-value warn'; }
+  }
+  function loadSafetensors(b) {
+    const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    const n = Number(dv.getBigUint64(0, true));
+    const hdr = JSON.parse(new TextDecoder().decode(b.subarray(8, 8 + n)));
+    P.$('#st-hdr').textContent = `bytes 0–7   header length = ${n} (u64, little-endian)\nbytes 8–${7 + n}  ${JSON.stringify(hdr, null, 1)}\nbytes ${8 + n}–${b.length - 1}  raw tensor data`;
+    P.$('#st-rows').innerHTML = Object.entries(hdr).filter(([k]) => k !== '__metadata__').map(([k, t]) =>
+      `<tr><td>${esc(k)}</td><td>${esc(t.dtype)}</td><td>[${t.shape.join(', ')}]</td><td>${t.data_offsets[1] - t.data_offsets[0]}</td></tr>`).join('');
+    const g = P.$('#v-grep'); g.textContent = 'clean'; g.className = 'stat-value good'; P.$('#v-grep-sub').textContent = 'no blocklisted substring found';
+    const v = P.$('#v-ops'); v.textContent = 'no opcodes'; v.className = 'stat-value good'; P.$('#v-ops-sub').textContent = 'JSON header + raw bytes; nothing to import';
+    const l = P.$('#v-load'); l.textContent = 'parses JSON, copies bytes. Nothing runs.'; l.className = 'stat-value good';
+  }
+  function load(s) {
+    stopPlay(); name = s;
+    const b = bytesOf(B64[s]);
+    P.$$('#samples button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.s === s)));
+    P.$('#hex').textContent = [...b].map((x, i) => (i % 24 === 0 ? (i ? '\n' : '') + i.toString().padStart(4, ' ') + '  ' : '') + x.toString(16).padStart(2, '0')).join(' ');
+    const st = s === 'safetensors';
+    P.$('#pk-wrap').hidden = st; P.$('#stepper').hidden = st; P.$('#st-wrap').hidden = !st;
+    if (st) { loadSafetensors(b); return; }
+    ops = disassemble(b); cur = 0;
+    renderOps(); renderStep(); verdict(b);
+  }
+  const go = i => { cur = Math.max(0, Math.min(ops.length - 1, i)); renderStep(); };
+  function stopPlay() { clearInterval(playT); playT = null; P.$('#b-play').textContent = '▶ Run to first call'; }
+  P.$('#b-play').addEventListener('click', () => {
+    if (playT) return stopPlay();
+    const target = ops.findIndex((o, i) => i > cur && o.call && !ALLOW.has(o.call));
+    const end = target >= 0 ? target : ops.length - 1;
+    if (P.reduced()) { go(end); return; }
+    P.$('#b-play').textContent = '❚❚ Pause';
+    playT = setInterval(() => { if (cur >= end) return stopPlay(); go(cur + 1); }, 70);
+  });
+  P.$('#b-first').addEventListener('click', () => { stopPlay(); go(0); });
+  P.$('#b-last').addEventListener('click', () => { stopPlay(); go(ops.length - 1); });
+  P.$('#b-prev').addEventListener('click', () => { stopPlay(); go(cur - 1); });
+  P.$('#b-next').addEventListener('click', () => { stopPlay(); go(cur + 1); });
+  $ops.addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) { stopPlay(); go(+li.dataset.i); } });
+  $ops.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); stopPlay(); go(cur + 1); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); stopPlay(); go(cur - 1); }
+  });
+  P.$('#samples').addEventListener('click', e => { const b = e.target.closest('button'); if (b) load(b.dataset.s); });
+  load('malicious');
+})();
+</script>
+</body>
+</html>

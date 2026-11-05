@@ -17,10 +17,12 @@ I work on this site in short weekend sessions of **20–30 minutes**. So:
 
 - Static site, no build step. **Keep it that way for now.** A framework migration is out of scope unless I ask. Hosted on Vercel at https://portfolio-webapp-roan.vercel.app (canonical + OG URLs use it).
 - `index.html` (homepage), `posts/*.html` (interactive posts), `assets/css/{site,home,post}.css`, `assets/js/{site,post,data,hero}.js`, `og-image.png` (rendered from `assets/og/og-source.html`), icons (`favicon.ico` 16/32/48, `assets/icons/icon-192.png`, `assets/icons/apple-touch-icon.png` on Paper; all generated from `assets/icons/naresh_website.png`), `design/visual-refresh-plan.html` (approved design reference, noindex).
-- Homepage sections: hero + proof strip, Work ("Two problems I work on"), Writing (rendered from `assets/js/data.js`), Upstream & evidence, Foundations (skill → artifact map), Profiles, Contact. Section kickers are auto-numbered (§01…) by a CSS counter in `home.css`.
-- **Profiles (Nov 2026):** GitHub, Hugging Face and LeetCode only. LinkedIn, Substack and X were removed site-wide at my request (footers, contact, JSON-LD, writing index); don't re-add them.
+- Homepage sections: hero + proof strip, Work ("Three problems I work on": reliability, efficiency, trust), Security (incident ticker + layered threat map, `assets/js/threatmap.js`), Writing (rendered from `assets/js/data.js`, with topic filters), Upstream & evidence, Toolbox (`#foundations`: skill → artifact map + unrated tool list), Profiles (+ socials row), Contact. Section kickers are auto-numbered (§01…) by a CSS counter in `home.css`.
+- Security data: `assets/js/security-data.js` holds the stack layers and the sourced incident list used by the threat map and `posts/ai-infra-breaches.html`. Every incident links its advisory / CVE / researcher write-up; add new ones there.
+- Site-wide: command palette (⌘K / Ctrl+K / "/") and scroll-progress bar in `site.js`; every page loads `data.js` so the palette lists posts. Brand is an "NK" mark + "Naresh Kumar" (the old `naresh.infra` wordmark was retired Nov 2026).
+- **Profiles (updated 5 Nov 2026, at my request):** GitHub, Hugging Face and LeetCode as profile cards, plus a socials row: LinkedIn, Substack, YouTube, Docker Hub and X (@naresh_swe24). These are back in footers, contact and JSON-LD `sameAs`. This supersedes the earlier removal.
 - Visual system ("datasheet", approved Oct 2026): six named colors in `site.css` (Paper, Ink, Graphite, Signal = reliability/links/running, Copper = efficiency/in progress, Fault = failures only), light default + dark via system setting or nav toggle. IBM Plex Sans + IBM Plex Mono only. Widgets are numbered figures ("Fig. n", CSS counter). Use tokens, never raw hex, in page CSS; set SVG paint via `style` (or `P.svg`) so `var()` works.
-- Hero "Fig. 0" (`hero.js`): ring loses a link → stall spreads → timeout → restore on spare, with a goodput timeline; static frame under reduced motion, paused off-screen.
+- Hero "Fig. 0" (`hero.js`): ring loses a link → stall spreads → timeout → restore on spare → an unattested peer is denied while training continues, with a goodput timeline and a typed terminal line; static frame under reduced motion, paused off-screen.
 
 ## What the site is for
 
@@ -28,11 +30,12 @@ I'm a GPU cluster networking and distributed-training infrastructure engineer: ~
 
 The site's one job is to turn a glance into a click on verifiable proof: a repo, a merged PR, a model card, a write-up. It is a funnel into proof-of-work, not a learning journal or a résumé.
 
-The story is two-part, mirroring how AI lab infra orgs are organized:
+The story is three-part (security added Nov 2026), mirroring how AI lab infra orgs are organized:
 - **Reliability at scale**: fault-tolerant training orchestrator (fault injection, NCCL timeout signatures, DCGM telemetry, topology-aware checkpoint-restart), plus the Hugging Face incident classifier and root-cause reasoning model.
 - **Efficiency at scale**: disaggregated inference engine (prefill/decode pools, RDMA KV-cache transfer, Triton fused attention).
+- **Trust at scale**: secure AI/ML infrastructure: zero trust for GPU fabrics (RDMA trust model, memory windows), model artifacts (pickle vs safetensors), multi-tenant serving (prefix-cache side channels) and AI agents (blast radius, gated executors). Evidence: goodput's SECURITY.md invariants, kvwire ADR-0005, and the five security posts.
 
-Kernel/eBPF/DPDK/RDMA depth is the *foundation* that makes both stories credible. It is not the headline.
+Kernel/eBPF/DPDK/RDMA depth is the *foundation* that makes all three stories credible. It is not the headline.
 
 ## Interactive posts
 
@@ -55,7 +58,7 @@ Kernel/eBPF/DPDK/RDMA depth is the *foundation* that makes both stories credible
 3. **Replace "Infra Deep Dives" with "Two problems I work on."** Two blocks, Reliability at scale and Efficiency at scale. Each has problem (1 sentence), why it's hard (1 sentence), my approach (2–3 sentences), status, headline result *only if real*, and links (repo, related HF models, related posts). The topic descriptions from the old section can move into an "Areas" line under Foundations if worth keeping.
 4. **Replace "Achievements" with "Upstream & evidence."** OSS first (vLLM PR, the cudagraph padding issue, the libbpf fix if I give the link). Each entry gets one line on what broke and what changed, plus a link. Any unlinkable item gets a `TODO(naresh)`.
 5. **Replace Roadmap + Skills with "Foundations."** A compact evidence map: each skill area → the artifact that proves it (repo, post, PR). Areas without evidence are listed plainly with no rating, or cut.
-6. **Developer Profiles cleanup.** GitHub, Hugging Face, LeetCode. LinkedIn, Substack, X, Docker Hub and Google Developers are removed; don't re-add them.
+6. **Developer Profiles cleanup.** GitHub, Hugging Face, LeetCode. (Superseded 5 Nov 2026: LinkedIn, Substack, YouTube, Docker Hub and X are back as a socials row. Google Developers stays removed.)
 7. **First case study page** (`work/training-orchestrator.html`), only once the repo has something runnable. Fixed template: Problem → Why it's hard → Architecture (SVG or Mermaid) → Key decisions and trade-offs rejected → Results with methodology (hardware, topology, baseline, how measured) → What broke → What's next → Links. Link it from the Reliability block.
 8. **Writing index.** Blog cards pull from a small JSON array (title, date, url, tag, summary) so adding a post is a one-line edit. Off-site write-ups use `kind: "external"`; don't duplicate content.
 9. **Share preview.** A static Open Graph image (1200×630) and `twitter:card` set to `summary_large_image`.

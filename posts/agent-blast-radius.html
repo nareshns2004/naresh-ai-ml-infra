@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The blast radius of an AI agent — Naresh Kumar</title>
+<meta name="description" content="Interactive model of a prompt-injected infrastructure agent: switch on read-only tools, a policy-gated executor, scoped credentials, egress allowlists, signed artifacts and network segmentation, and watch which assets it can still reach.">
+<meta name="author" content="Naresh Kumar">
+<link rel="canonical" href="https://portfolio-webapp-roan.vercel.app/posts/agent-blast-radius.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The blast radius of an AI agent">
+<meta property="og:description" content="Assume the agent is fooled. Then count what it can still touch. An interactive blast-radius model for infra agents.">
+<meta property="og:url" content="https://portfolio-webapp-roan.vercel.app/posts/agent-blast-radius.html">
+<meta property="og:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@naresh_swe24">
+<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
+<script>try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="icon" href="../assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/post.css">
+<style>.ctl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin: 0.9rem 0; }
+  .ctl { display: flex; gap: 0.6rem; align-items: flex-start; border: 1px solid var(--border); border-radius: 5px; padding: 0.55rem 0.7rem; cursor: pointer; background: var(--bg); transition: border-color 0.2s, background 0.2s; }
+  .ctl:hover { border-color: var(--signal); }
+  .ctl input { accent-color: var(--signal); margin-top: 0.2rem; }
+  .ctl b { display: block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text); }
+  .ctl span { font-size: 0.78rem; color: var(--text-dim); line-height: 1.35; }
+  .ctl.on { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 7%, transparent); }
+  .nd rect { fill: var(--paper); stroke: var(--rule-strong); stroke-width: 1.2; }
+  .nd text { fill: var(--text); font-size: 10.5px; text-anchor: middle; }
+  .nd.hit rect { stroke: var(--fault); stroke-width: 2; fill: color-mix(in srgb, var(--fault) 10%, var(--paper)); }
+  .nd.hit text { fill: var(--fault); font-weight: 600; }
+  .nd.agent rect { stroke: var(--fault); stroke-dasharray: 4 3; }
+  .col-t { fill: var(--text-dim); font-size: 9.5px; letter-spacing: 0.08em; text-anchor: middle; }
+  .e { fill: none; stroke: var(--border); stroke-width: 1.2; }
+  .e.hit { stroke: var(--fault); stroke-width: 2; stroke-dasharray: 6 4; animation: flow 0.9s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -20; } }
+  .gate { fill: var(--signal); }
+  .gate-t { fill: var(--signal); font-size: 9px; font-weight: 600; text-anchor: middle; }
+  .moves { display: grid; gap: 0.35rem; margin-top: 0.8rem; }
+  .mv { display: grid; grid-template-columns: 6.5rem 1fr; gap: 0.75rem; font-size: 0.86rem; padding: 0.4rem 0; border-top: 1px dashed var(--border); }
+  .mv .s { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem; }
+  .mv .s.hit { color: var(--fault); } .mv .s.blk { color: var(--signal); }
+  .mv .why { color: var(--text-dim); display: block; font-size: 0.8rem; }
+  @media (prefers-reduced-motion: reduce) { .e.hit { animation: none; } }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "The blast radius of an AI agent", "author": {"@type": "Person", "name": "Naresh Kumar", "url": "https://portfolio-webapp-roan.vercel.app/"}, "datePublished": "2026-11-05", "keywords": "AI agent security, prompt injection, MCP security, least privilege, blast radius, zero trust"}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../index.html"><span class="brand-mark" aria-hidden="true">NK</span>Naresh Kumar</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="../index.html#work">Work</a></li>
+      <li><a href="../index.html#security">Security</a></li>
+      <li><a href="../index.html#writing">Writing</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main" class="post">
+<a class="post-back" href="../index.html#writing">← All writing</a>
+  <header class="post-head">
+    <div class="chips"><span class="chip chip-fault">Security</span><span class="chip">▶ Interactive</span></div>
+    <h1>The blast radius of an AI agent</h1>
+    <p class="post-dek">Prompt injection has no complete fix: a model that reads untrusted text can be steered by it. So stop asking whether the agent will be fooled, and start measuring what a fooled agent can reach.</p>
+    <p class="post-byline">Naresh Kumar · Nov 2026 · 8 min read</p>
+  </header>
+
+  <aside class="tldr">
+    <strong>TL;DR</strong>
+    <ul>
+      <li>An infra agent is a remote shell that takes instructions from whatever it reads: issues, logs, tickets, web pages, emails. Each of those is an input channel for an attacker.</li>
+      <li>The agent’s <b>blast radius</b> is the set of assets reachable through its tools and credentials. It is a property of the infrastructure, not of the model.</li>
+      <li>No single control closes it. Scoped credentials remove most of it; read-only tools plus a gated executor remove the writes; egress allowlists remove the quiet exfiltration that is left.</li>
+    </ul>
+  </aside>
+
+  <div class="prose">
+    <h2>The setup</h2>
+    <p>An on-call agent helps triage GPU-cluster incidents. It can read GitHub issues and logs, run <code>kubectl</code> and <code>sbatch</code>, call the cloud CLI, open a shell on a debug pod, and fetch URLs. Like most agents in 2025, it runs with the on-call engineer’s credentials. Someone files an issue containing instructions addressed to the agent. <strong>In this model the agent always follows them.</strong> The only question is what happens next.</p>
+  </div>
+
+  <figure class="widget" aria-labelledby="w-br">
+    <div class="widget-head">
+      <span class="widget-title" id="w-br">What a fooled agent can reach</span>
+      <span class="widget-hint">Toggle controls · red paths succeed · blue shields mark where a control stops one</span>
+    </div>
+    <div class="btn-row" id="presets" role="toolbar" aria-label="Presets">
+      <button class="wbtn" type="button" data-p="none">Typical agent, no controls</button>
+      <button class="wbtn" type="button" data-p="scope">Scoped credentials only</button>
+      <button class="wbtn" type="button" data-p="all">Defense in depth</button>
+    </div>
+    <div class="ctl-grid" id="ctls" role="group" aria-label="Controls"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Assets reached</div><div class="stat-value" id="o-assets">–</div><div class="stat-sub" id="o-assets-sub"></div></div>
+      <div class="stat"><div class="stat-label">Attack moves that work</div><div class="stat-value" id="o-moves">–</div></div>
+      <div class="stat"><div class="stat-label">Biggest remaining gap</div><div class="stat-value" id="o-gap" style="font-size:.95rem">–</div></div>
+    </div>
+    <div class="fig-scroll"><svg id="g" viewBox="0 0 760 430" role="img" aria-label="Graph from untrusted input through the agent, its tools and credentials to infrastructure assets; successful attack paths are highlighted"></svg></div>
+    <div class="moves" id="moves" aria-live="polite"></div>
+  </figure>
+
+  <div class="prose">
+    <h2>Reading the result</h2>
+    <p>Start from <b>Typical agent</b>: every path is red. This isn’t hypothetical. Each move has a public precedent: publishing private repositories through a public PR is the <a href="https://invariantlabs.ai/blog/mcp-github-vulnerability" target="_blank" rel="noopener">GitHub MCP toxic flow</a>; a context leak through a fetched URL is the shape of <a href="https://www.cve.org/CVERecord?id=CVE-2025-32711" target="_blank" rel="noopener">EchoLeak</a>; miners on a GPU fleet are <a href="https://www.oligo.security/blog/shadowray-attack-ai-workloads-actively-exploited-in-the-wild" target="_blank" rel="noopener">ShadowRay</a>; a destructive cloud prompt is the <a href="https://aws.amazon.com/security/security-bulletins/AWS-2025-015/" target="_blank" rel="noopener">Amazon Q wiper</a>; a token that could overwrite models is the <a href="https://www.wiz.io/blog/38-terabytes-of-private-data-accidentally-exposed-by-microsoft-ai-researchers" target="_blank" rel="noopener">38 TB SAS link</a>.</p>
+    <p>Now try <b>Scoped credentials only</b>. Most of the graph goes dark, because most damage came from credentials that were broader than the task. But the shell pivot and the context leak survive: neither needed a credential, just a tool and a network path. That is why the controls stack:</p>
+    <ul>
+      <li><strong>Scope</strong> decides <em>what</em> the agent can touch. One task, one repository, one namespace, one bucket prefix, expiring with the task.</li>
+      <li><strong>Read-only tools and a gated executor</strong> decide <em>how</em>. The agent proposes a mutation; an allowlisted executor validates it against policy, logs it, and asks a human for anything destructive. The attacker can’t approve.</li>
+      <li><strong>Egress allowlists</strong> close the quiet channel. A fooled agent that can read and fetch arbitrary URLs can always leak its own context.</li>
+      <li><strong>Signed artifacts</strong> turn tampering from silent into detected. <strong>Segmentation</strong> keeps a debug shell from becoming a foothold on the fabric.</li>
+    </ul>
+    <p>The same rule governs my own tooling. goodput’s fault injector is default-deny: it acts only on allowlisted hosts, every fault auto-reverts, destructive mechanisms need an explicit opt-in, and GPU resets, firmware and switch changes always need a human (<a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>). Its planned root-cause model gets read-only evidence and recommends; it never acts.</p>
+  </div>
+
+  <aside class="assumptions">
+    <h2>Model &amp; assumptions</h2>
+    <ul>
+      <li>The agent is always fooled: every injected instruction is followed. This is a worst case by design. Injection classifiers lower the probability; this model measures the consequence.</li>
+      <li>Each move is a path input → agent → tool → credential or network → asset. A control blocks a move at the first stage it applies to. Read-only tools and the gated executor block writes and exec; scoped credentials block any move whose credential exceeds the task; segmentation blocks internal pivots; signed artifacts turn tampering into detection at load; exfiltration needs a channel, either open egress or a write the agent is allowed to make.</li>
+      <li>Binary controls, perfectly implemented. Real ones have gaps (allowlists too broad, approval fatigue), which is the argument for stacking them.</li>
+      <li>The asset list is a typical AI-infra estate, not a complete one.</li>
+    </ul>
+  </aside>
+
+  <section class="post-end">
+    <h2>Keep going</h2>
+    <div class="post-end-grid">
+      <a class="card" href="pickle-is-a-program.html"><div class="k">Next · interactive</div><div class="v">Pickle is a program: loading a checkpoint is running code</div></a>
+      <a class="card" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput: default-deny fault injection ↗</div></a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© Naresh Kumar · <a href="../index.html">Home</a> · press <kbd>⌘K</kbd> to jump</span>
+  <div class="footer-links">
+    <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
+    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
+  </div>
+</footer>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/post.js"></script>
+<script>
+(function () {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const CTL = [
+    ['ro', 'Read-only tools', 'no write, delete or exec verbs exposed to the model'],
+    ['gate', 'Gated executor', 'mutations go through an allowlist, audit log and human approval'],
+    ['scope', 'Scoped, short-lived creds', 'one task → one repo / namespace / bucket prefix'],
+    ['egress', 'Egress allowlist', 'no outbound connections except named endpoints'],
+    ['sign', 'Signed artifacts', 'checkpoints and data verified by hash + signature at load'],
+    ['seg', 'Network segmentation', 'agent sandbox can’t reach control plane or fabric'],
+  ];
+  const TOOLS = ['git / MCP', 'kubectl', 'sbatch', 'cloud CLI', 'shell', 'http fetch'];
+  const CREDS = ['GitHub PAT', 'kubeconfig', 'cloud token', 'internal net', 'internet'];
+  const ASSETS = ['private repos', 'cluster secrets', 'model weights', 'checkpoints', 'training data', 'GPU fleet', 'prod inference', 'fabric & ctrl plane', 'agent context'];
+  // write: needs a mutating verb · scoped: needs a credential broader than the task · net: 'internal' pivot
+  // exfil: needs an outbound channel · tamper: integrity attack that signing detects
+  const MOVES = [
+    { t: 'Publish private repos in a public PR', tool: 0, cred: 0, asset: 0, write: 1, scoped: 1 },
+    { t: 'Dump cluster secrets and ship them out', tool: 1, cred: 1, asset: 1, scoped: 1, exfil: 1 },
+    { t: 'Copy model weights to an attacker bucket', tool: 3, cred: 2, asset: 2, scoped: 1, exfil: 1 },
+    { t: 'Swap a checkpoint for a backdoored one', tool: 3, cred: 2, asset: 3, write: 1, scoped: 1, tamper: 1 },
+    { t: 'Poison training-data shards', tool: 3, cred: 2, asset: 4, write: 1, scoped: 1, tamper: 1 },
+    { t: 'Submit crypto-miner jobs to the GPU fleet', tool: 2, cred: 1, asset: 5, write: 1, scoped: 1 },
+    { t: 'Delete the production inference deployment', tool: 1, cred: 1, asset: 6, write: 1, scoped: 1 },
+    { t: 'Open a debug shell and pivot onto the fabric', tool: 4, cred: 3, asset: 7, write: 1, net: 'internal' },
+    { t: 'Leak its own context via a fetched URL', tool: 5, cred: 4, asset: 8, exfil: 1 },
+  ];
+  const WHY = {
+    ro: 'read-only tools: the verb isn’t there', gate: 'gated executor: held for approval the attacker can’t give',
+    scope: 'scoped credential: outside this task’s scope', egress: 'egress allowlist: no channel out',
+    sign: 'signed artifacts: detected at load, never restored', seg: 'segmentation: no route from the sandbox',
+  };
+  const on = Object.fromEntries(CTL.map(([k]) => [k, false]));
+
+  function evalMove(m) {
+    const writeOK = !on.ro && !on.gate;
+    if (m.write && on.ro) return { at: 'tool', by: 'ro' };
+    if (m.write && on.gate) return { at: 'tool', by: 'gate' };
+    if (m.scoped && on.scope) return { at: 'cred', by: 'scope' };
+    if (m.net === 'internal' && on.seg) return { at: 'cred', by: 'seg' };
+    if (m.exfil && on.egress && !writeOK) return { at: 'asset', by: 'egress' };
+    if (m.exfil && on.egress && m.tool === 5) return { at: 'asset', by: 'egress' };
+    if (m.tamper && on.sign) return { at: 'asset', by: 'sign' };
+    return null;
+  }
+
+  const svg = P.$('#g');
+  const CX = [58, 172, 304, 452, 650], W = [100, 100, 92, 96, 136];
+  const ys = (n, top = 50, bot = 410) => Array.from({ length: n }, (_, i) => top + (bot - top) * (i + 0.5) / n);
+  const YT = ys(TOOLS.length), YC = ys(CREDS.length), YA = ys(ASSETS.length), YI = 230;
+
+  function draw(res) {
+    svg.innerHTML = '';
+    ['INPUT', 'AGENT', 'TOOLS', 'CREDS / NETWORK', 'ASSETS'].forEach((t, i) => P.svg('text', { x: CX[i], y: 22, class: 'col-t' }, svg).textContent = t);
+    const hitT = new Set(), hitC = new Set(), hitA = new Set();
+    const edge = (x1, y1, x2, y2, hit) => P.svg('path', { d: `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`, class: 'e' + (hit ? ' hit' : '') }, svg);
+    const gates = [];
+    MOVES.forEach((m, i) => {
+      const r = res[i], hit = !r;
+      const pts = [[CX[1] + W[1] / 2, YI], [CX[2] - W[2] / 2, YT[m.tool]], [CX[2] + W[2] / 2, YT[m.tool]], [CX[3] - W[3] / 2, YC[m.cred]], [CX[3] + W[3] / 2, YC[m.cred]], [CX[4] - W[4] / 2, YA[m.asset]]];
+      const seg = [[0, 1], [2, 3], [4, 5]];
+      const stop = r ? { tool: 0, cred: 1, asset: 2 }[r.at] : 3;
+      seg.forEach(([a, b], k) => edge(...pts[a], ...pts[b], hit || k < stop));
+      if (hit) { hitT.add(m.tool); hitC.add(m.cred); hitA.add(m.asset); }
+      else {
+        const [a, b] = seg[stop], gx = (pts[a][0] + pts[b][0]) / 2, gy = (pts[a][1] + pts[b][1]) / 2;
+        gates.push([gx, gy, r.by]);
+      }
+    });
+    const node = (x, y, w, label, hit, cls = '') => {
+      const g = P.svg('g', { class: 'nd' + (hit ? ' hit' : '') + cls }, svg);
+      P.svg('rect', { x: x - w / 2, y: y - 12, width: w, height: 24, rx: 3 }, g);
+      P.svg('text', { x, y: y + 4 }, g).textContent = label;
+    };
+    node(CX[0], YI, W[0], 'untrusted text', true);
+    P.svg('path', { d: `M${CX[0] + W[0] / 2},${YI} H${CX[1] - W[1] / 2}`, class: 'e hit' }, svg);
+    node(CX[1], YI, W[1], 'agent (fooled)', true, ' agent');
+    TOOLS.forEach((t, i) => node(CX[2], YT[i], W[2], t, hitT.has(i)));
+    CREDS.forEach((t, i) => node(CX[3], YC[i], W[3], t, hitC.has(i)));
+    ASSETS.forEach((t, i) => node(CX[4], YA[i], W[4], t, hitA.has(i)));
+    const seenG = {};
+    gates.forEach(([x, y, by]) => {
+      const k = `${Math.round(x)}:${Math.round(y)}`; if (seenG[k]) return; seenG[k] = 1;
+      P.svg('path', { d: `M${x},${y - 8} l7,2.6 v4.6 c0,4 -3,6.8 -7,7.8 c-4,-1 -7,-3.8 -7,-7.8 v-4.6 z`, class: 'gate' }, svg);
+    });
+    return hitA;
+  }
+
+  function update() {
+    const res = MOVES.map(evalMove);
+    const hitA = draw(res);
+    const nHit = res.filter(r => !r).length;
+    const a = P.$('#o-assets'); a.textContent = `${hitA.size} / ${ASSETS.length}`;
+    a.className = 'stat-value ' + (hitA.size === 0 ? 'good' : hitA.size <= 2 ? 'warn' : 'bad');
+    P.$('#o-assets-sub').textContent = hitA.size ? [...hitA].map(i => ASSETS[i]).join(', ') : 'nothing a fooled agent can damage';
+    P.$('#o-moves').textContent = `${nHit} / ${MOVES.length}`;
+    // biggest gap: the off control that would block the most currently-successful moves
+    let best = null;
+    for (const [k, name] of CTL) {
+      if (on[k]) continue;
+      on[k] = true; const n = MOVES.map(evalMove).filter(r => !r).length; on[k] = false;
+      if (!best || n < best[1]) best = [name, n];
+    }
+    P.$('#o-gap').textContent = nHit === 0 ? 'none: contained' : best ? `turn on “${best[0]}” (→ ${best[1]} moves)` : '–';
+    P.$('#moves').innerHTML = MOVES.map((m, i) => {
+      const r = res[i];
+      return `<div class="mv"><span class="s ${r ? 'blk' : 'hit'}">${r ? 'blocked' : 'succeeds'}</span><span>${esc(m.t)}
+        <span class="why">${r ? esc(WHY[r.by]) : `via ${esc(TOOLS[m.tool])} + ${esc(CREDS[m.cred])} → ${esc(ASSETS[m.asset])}`}</span></span></div>`;
+    }).join('');
+    P.$$('.ctl').forEach(el => el.classList.toggle('on', on[el.dataset.k]));
+  }
+
+  P.$('#ctls').innerHTML = CTL.map(([k, t, d]) =>
+    `<label class="ctl" data-k="${k}"><input type="checkbox" id="c-${k}"><span><b>${esc(t)}</b>${esc(d)}</span></label>`).join('');
+  CTL.forEach(([k]) => P.$('#c-' + k).addEventListener('change', e => { on[k] = e.target.checked; update(); }));
+  P.$('#presets').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const p = b.dataset.p;
+    CTL.forEach(([k]) => { on[k] = p === 'all' || (p === 'scope' && k === 'scope'); P.$('#c-' + k).checked = on[k]; });
+    update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>

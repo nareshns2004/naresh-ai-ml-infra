@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Naresh Kumar — GPU Cluster Networking &amp; Training Infrastructure</title>
-<meta name="description" content="Naresh Kumar builds GPU cluster networking and distributed-training infrastructure: fault attribution and recovery for multi-node training, and RDMA KV-cache transport for disaggregated inference. ~9 years in kernel networking, RDMA/RoCE, DPDK, SR-IOV and NCCL.">
+<title>Naresh Kumar — Secure AI/ML Infrastructure: GPU Networking, Distributed Training, Zero Trust</title>
+<meta name="description" content="Naresh Kumar builds secure AI/ML infrastructure: fault attribution and recovery for multi-node training, RDMA KV-cache transport for disaggregated inference, and zero-trust controls for GPU fabrics, model artifacts and AI agents. Repos, models and interactive write-ups.">
 <meta name="author" content="Naresh Kumar">
 <link rel="canonical" href="https://portfolio-webapp-roan.vercel.app/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://portfolio-webapp-roan.vercel.app/">
-<meta property="og:title" content="Naresh Kumar — GPU Cluster Networking &amp; Training Infrastructure">
-<meta property="og:description" content="A GPU cluster is only as fast as its slowest link and as reliable as its weakest. Repos, models and interactive write-ups on making it lose less time to both.">
+<meta property="og:title" content="Naresh Kumar — Secure AI/ML Infrastructure">
+<meta property="og:description" content="GPU infrastructure that can’t be stalled, slowed, or stolen. Repos, models and interactive write-ups on reliability, efficiency and security at scale.">
 <meta property="og:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Naresh Kumar: GPU cluster networking and distributed-training infrastructure">
+<meta property="og:image:alt" content="Naresh Kumar: secure AI/ML infrastructure — GPU networking, distributed training, zero trust">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@naresh_swe24">
 <meta name="twitter:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
 <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
@@ -27,12 +28,17 @@
   "name": "Naresh Kumar",
   "alternateName": "nareshns2004",
   "url": "https://portfolio-webapp-roan.vercel.app/",
-  "jobTitle": "GPU Cluster Networking & Distributed-Training Infrastructure Engineer",
-  "knowsAbout": ["GPU cluster networking", "Distributed training", "NCCL", "RDMA", "RoCE", "Disaggregated inference", "Incident triage and root-cause analysis", "DPDK", "SR-IOV", "KVM", "Linux kernel networking", "eBPF", "XDP"],
+  "jobTitle": "Secure AI/ML Infrastructure Engineer — GPU Cluster Networking & Distributed Systems",
+  "knowsAbout": ["AI/ML infrastructure security", "GPU cluster networking", "Distributed training", "NCCL", "RDMA", "RoCE", "InfiniBand", "Disaggregated inference", "AI agent security", "Prompt injection", "Model supply-chain security", "Zero-trust architecture", "Multi-tenant inference isolation", "Incident triage and root-cause analysis", "DPDK", "SR-IOV", "KVM", "Linux kernel networking", "eBPF", "XDP"],
   "sameAs": [
     "https://github.com/nareshns2004",
     "https://huggingface.co/nareshns2004",
-    "https://leetcode.com/u/nareshns2004/"
+    "https://leetcode.com/u/nareshns2004/",
+    "https://www.linkedin.com/in/nareshns2004/",
+    "https://substack.com/@nareshns2004",
+    "https://www.youtube.com/@nareshns2004",
+    "https://hub.docker.com/u/nareshns2004",
+    "https://x.com/naresh_swe24"
   ]
 }
 </script>
@@ -50,13 +56,13 @@
 
 <nav class="nav" aria-label="Primary">
   <div class="nav-inner">
-    <a class="nav-brand" href="#top">naresh<span>.</span>infra</a>
+    <a class="nav-brand" href="#top"><span class="brand-mark" aria-hidden="true">NK</span>Naresh Kumar</a>
     <ul class="nav-links" id="nav-links">
       <li><a href="#work">Work</a></li>
+      <li><a href="#security">Security</a></li>
       <li><a href="#writing">Writing</a></li>
       <li><a href="#evidence">Evidence</a></li>
-      <li><a href="#foundations">Foundations</a></li>
-      <li><a href="#profiles">Profiles</a></li>
+      <li><a href="#foundations">Toolbox</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-right">
@@ -70,42 +76,48 @@
 <main id="main">
 
 <!-- HERO -->
-<!-- Hero line: blend of options A + C, chosen by Naresh (Oct 2026). -->
+<!-- Hero line options (Nov 2026 security refresh), pick one:
+     A. "Frontier models deserve infrastructure that can’t be stalled, slowed, or stolen."   ← live
+     B. "AI infrastructure that’s fast on the wire, calm under failure, and closed to intruders."
+     C. "I keep GPU clusters fast, keep them running, and keep them yours." -->
 <header class="hero" id="top">
   <div>
-    <p class="hero-eyebrow"><strong>Naresh Kumar</strong> · GPU cluster networking &amp; distributed-training infrastructure</p>
-    <h1 class="hero-title">A GPU cluster is only as fast as its <em class="alt">slowest link</em> and as reliable as its <em>weakest</em>. I make it lose less time to both.</h1>
+    <p class="hero-eyebrow"><strong>Naresh Kumar</strong> · Secure AI/ML infrastructure: GPU networking · distributed systems · zero trust</p>
+    <h1 class="hero-title">Frontier models deserve infrastructure that can’t be <em>stalled</em>, <em class="alt">slowed</em>, or <em class="sec">stolen</em>.</h1>
     <p class="hero-bio">
       <!-- TODO(naresh): "~9 years" used to link to LinkedIn (removed Nov 2026). Link evidence or cut. -->
       ~9 years below the framework layer:
-      kernel networking, RDMA/RoCE, DPDK, SR-IOV, KVM and NCCL. Now applying it to the two problems that
-      decide what a training or inference cluster actually delivers: reliability and efficiency at scale.
+      kernel networking, RDMA/RoCE, DPDK, SR-IOV, KVM and NCCL. Now applied to the three things a training or
+      inference cluster must get right at scale: <b>reliability</b>, <b>efficiency</b> and, now that AI agents hold the keys, <b>security</b>.
     </p>
     <div class="hero-tags" aria-label="Focus areas">
       <span class="chip lead">GPU cluster networking</span>
       <span class="chip lead">Distributed training</span>
-      <span class="chip lead">NCCL</span>
-      <span class="chip lead">RDMA / RoCE v2</span>
+      <span class="chip lead">NCCL · RDMA / RoCE v2</span>
+      <span class="chip lead sec">AI-infra security</span>
+      <span class="chip lead sec">Zero trust for agents</span>
       <span class="chip">Disaggregated inference</span>
       <span class="chip">DPDK · SR-IOV · KVM</span>
       <span class="chip">Linux kernel · eBPF / XDP</span>
     </div>
     <div class="hero-cta">
       <a href="#work" class="btn btn-primary">See the work →</a>
-      <a href="posts/ring-allreduce-failure.html" class="btn btn-outline">▶ Run a failure simulator</a>
+      <a href="#security" class="btn btn-outline">Explore the attack surface →</a>
+      <button type="button" class="btn btn-ghost" data-palette-open aria-label="Open command palette"><kbd>⌘K</kbd> jump anywhere</button>
     </div>
   </div>
 
   <div class="hero-viz">
     <figure class="fig">
-      <figcaption class="fig-bar"><span>Fig. 0 · Ring all-reduce under failure</span><span>8 GPUs</span></figcaption>
+      <figcaption class="fig-bar"><span>Fig. 0 · Ring all-reduce under failure &amp; attack</span><span>8 GPUs</span></figcaption>
       <svg id="hero-fig" viewBox="0 0 440 390" role="img" aria-labelledby="hero-fig-title hero-fig-desc">
-        <title id="hero-fig-title">Ring all-reduce losing a link and recovering</title>
-        <desc id="hero-fig-desc">Eight GPUs pass gradient chunks around a ring. The link between GPU 2 and GPU 3 fails, the stall spreads around the ring, every rank times out, and the job restores from a checkpoint onto a spare GPU. A goodput timeline shows productive time in blue, stalled time hatched and restart time in red.</desc>
+        <title id="hero-fig-title">Ring all-reduce losing a link, recovering, then refusing an intruder</title>
+        <desc id="hero-fig-desc">Eight GPUs pass gradient chunks around a ring. The link between GPU 2 and GPU 3 fails, the stall spreads, every rank times out, and the job restores onto a spare. Then an unattested host tries to join the communicator and is denied while training continues. A goodput timeline shows productive time in blue, stalled time hatched and restart time in red.</desc>
       </svg>
-      <noscript><p class="fig-note">One link fails, every rank stalls, and the job restarts from a checkpoint.</p></noscript>
+      <div class="hero-term" aria-hidden="true"><span class="ht-p" id="hero-term-p">$</span> <span id="hero-term">goodput watch --job llm-512</span><span class="ht-cur"></span></div>
+      <noscript><p class="fig-note">One link fails, every rank stalls, the job restores onto a spare, and an unattested peer is refused.</p></noscript>
     </figure>
-    <p class="fig-note">Every second the bar isn’t blue is lost goodput. <a href="posts/ring-allreduce-failure.html">Break the ring yourself →</a></p>
+    <p class="fig-note">Illustrative timeline. Every second the bar isn’t blue is lost goodput. <a href="posts/ring-allreduce-failure.html">Break the ring yourself →</a></p>
   </div>
 </header>
 
@@ -128,6 +140,11 @@
     <div class="proof-fact">kvwire: RDMA KV-cache transport for disaggregated inference</div>
     <div class="proof-sub">vLLM KV-connector plug-in. M1 in progress.</div>
   </a>
+  <a class="card proof-item sec reveal" href="posts/ai-infra-breaches.html">
+    <div class="proof-kicker"><span>Field guide · security</span><span>→</span></div>
+    <div class="proof-fact">18 AI-infra incidents, each mapped to the layer it hit and the control that contains it</div>
+    <div class="proof-sub">Every entry links its advisory or CVE</div>
+  </a>
   <a class="card proof-item reveal" href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">
     <div class="proof-kicker"><span>Model · Hugging Face</span><span>↗</span></div>
     <div class="proof-fact">qwen3-nccl-rca-lora: grounded root-cause analysis for NCCL incidents</div>
@@ -135,12 +152,12 @@
   </a>
 </section>
 
-<!-- TWO PROBLEMS -->
+<!-- THREE PROBLEMS -->
 <section class="section" id="work">
   <div class="section-head">
     <p class="section-kicker">Work</p>
-    <h2 class="section-title">Two problems I work on</h2>
-    <p class="section-lede">AI lab infrastructure splits along two lines: keep the job running, and make each GPU-hour count. Kernel and fabric depth is the foundation for both.</p>
+    <h2 class="section-title">Three problems I work on</h2>
+    <p class="section-lede">AI lab infrastructure splits along three lines: keep the job running, make each GPU-hour count, and make sure nobody else gets to use either. Kernel and fabric depth is the foundation for all three.</p>
   </div>
 
   <div class="problems">
@@ -180,18 +197,63 @@
         <a href="posts/pfc-deadlock.html">Post: PFC deadlock</a>
       </div>
     </article>
+
+    <article class="card problem problem-wide reveal" style="--pc: var(--fault)">
+      <div>
+        <p class="problem-kicker">Trust at scale</p>
+        <h3>Secure by construction <small>zero trust for GPU fabrics, model artifacts and AI agents</small></h3>
+        <p class="problem-quote">“Assume the model will be fooled. Design so that being fooled is cheap.”</p>
+      </div>
+      <dl>
+        <div><dt>Problem</dt><dd>The fastest paths in an AI cluster are the least watched. <strong>RDMA bypasses the host kernel</strong>, so firewalls and eBPF never see it. <strong>Checkpoints are programs</strong>: pickle runs code on load. And <strong>AI agents now hold the credentials</strong>, taking instructions from whatever they read.</dd></div>
+        <div><dt>Why it’s hard</dt><dd>Every control costs latency or bandwidth on hardware that is billed by the second, so security that slows the step gets turned off. The work is finding the controls that sit <em>off</em> the hot path: at the NIC, in the artifact format, at the tool boundary.</dd></div>
+        <div><dt>Approach</dt><dd>Threat-model each layer against <a href="posts/ai-infra-breaches.html">real incidents</a>, then build the control into the system rather than bolting it on. Already in my repos: goodput’s fault injector is <strong>default-deny</strong>. It acts only on allowlisted hosts, every fault carries an auto-revert watchdog, destructive mechanisms need an explicit opt-in, and GPU resets, firmware and switch changes are never automated (<a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>). kvwire’s <a href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">ADR-0005</a> evaluates <strong>per-transfer memory windows</strong>, invalidated before a KV block is reused, so the NIC itself rejects a late or stray write.</dd></div>
+        <div><dt>Status</dt><dd><span class="status status-ok">safety invariants in code</span> <span class="status status-early">fencing ADR proposed</span> <span class="status status-early">goodput RCA tier: recommends, never acts · planned</span> &nbsp;Plus five interactive security posts below.</dd></div>
+      </dl>
+      <div class="problem-links">
+        <a class="primary" href="posts/ai-infra-breaches.html">Field guide: AI-infra breaches</a>
+        <a href="posts/agent-blast-radius.html">Post: agent blast radius</a>
+        <a href="posts/pickle-is-a-program.html">Post: pickle is a program</a>
+        <a href="posts/rdma-trust-model.html">Post: RDMA’s trust model</a>
+        <a href="posts/prefix-cache-side-channel.html">Post: prefix-cache side channel</a>
+      </div>
+    </article>
   </div>
+</section>
+
+<!-- SECURITY: THREAT MAP -->
+<section class="section" id="security">
+  <div class="section-head">
+    <p class="section-kicker">Security</p>
+    <h2 class="section-title">The AI-infra attack surface, layer by layer</h2>
+    <p class="section-lede">Pick a layer. Each one shows what goes wrong, the controls I design for, and the public incidents that already happened there, each linked to its advisory or CVE.</p>
+  </div>
+
+  <div class="ticker reveal" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+
+  <figure class="card threatmap reveal" id="threatmap" aria-label="Interactive map of AI infrastructure layers, threats, controls and incidents">
+    <div class="tm-stack" role="tablist" aria-label="Infrastructure layers" id="tm-stack"></div>
+    <div class="tm-panel" role="tabpanel" id="tm-panel" aria-live="polite"></div>
+    <noscript><p class="fig-note">Interactive map needs JavaScript. See the <a href="posts/ai-infra-breaches.html">field guide</a> for the full list.</p></noscript>
+  </figure>
+  <p class="fig-note">Each layer is a trust boundary. An attacker who crosses one gets everything that layer was trusted with. <a href="posts/agent-blast-radius.html">Measure an agent’s blast radius →</a></p>
 </section>
 
 <!-- WRITING -->
 <section class="section" id="writing">
   <div class="section-head">
     <p class="section-kicker">Writing</p>
-    <h2 class="section-title">Simulators &amp; capacity models</h2>
-    <p class="section-lede">Each simulator runs in the browser: break a ring, size a KV transfer, freeze a fabric. Every model states its assumptions.</p>
+    <h2 class="section-title">Simulators, capacity models &amp; threat models</h2>
+    <p class="section-lede">Each post runs in the browser: break a ring, size a KV transfer, disassemble a malicious checkpoint, measure an agent’s blast radius. Every model states its assumptions.</p>
   </div>
+  <div class="filters" id="writing-filters" role="toolbar" aria-label="Filter posts by topic"></div>
   <div class="writing-grid" id="writing-grid">
     <noscript><ul>
+      <li><a href="posts/ai-infra-breaches.html">Field guide: how AI infrastructure actually gets breached</a></li>
+      <li><a href="posts/agent-blast-radius.html">The blast radius of an AI agent</a></li>
+      <li><a href="posts/pickle-is-a-program.html">Pickle is a program: loading a checkpoint is running code</a></li>
+      <li><a href="posts/rdma-trust-model.html">The kernel can’t see your tensors: RDMA’s trust model</a></li>
+      <li><a href="posts/prefix-cache-side-channel.html">Your prompt cache is a side channel</a></li>
       <li><a href="posts/ring-allreduce-failure.html">One dead link, 512 idle GPUs: ring all-reduce under failure</a></li>
       <li><a href="posts/kv-cache-transfer.html">The KV-cache bill: what disaggregated inference has to move</a></li>
       <li><a href="posts/pfc-deadlock.html">PFC: the lossless network that can freeze itself</a></li>
@@ -217,7 +279,7 @@
     <article class="card ev-item reveal">
       <h3>NIC counter → step-time attribution <code>nicprof</code></h3>
       <p><b>The gap:</b> a 512-GPU job slows down; the network team has millions of counter series, the ML team has a step-time graph, and nobody can say which counter explains which millisecond.</p>
-      <p><b>What it does:</b> aligns RDMA/ethtool/SR-IOV counters to each rank’s step windows, fits a non-negative model of excess step time, and traces PFC pause back to its origin so a <em>victim</em> port isn’t blamed as the cause.</p>
+      <p><b>What it does:</b> aligns RDMA/ethtool/SR-IOV counters to each rank’s step windows, fits a non-negative model of excess step time, and traces PFC pause back to its origin so a <em>victim</em> port isn’t blamed as the cause. NIC-side telemetry is also where kernel-bypass traffic becomes visible at all.</p>
       <div class="ev-side"><span class="status status-ok">Runnable demo</span><a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">Source ↗</a></div>
     </article>
 
@@ -229,6 +291,13 @@
     </article>
 
     <article class="card ev-item reveal">
+      <h3>Pickle opcode disassembler &amp; scanner <code>in-browser</code></h3>
+      <p><b>The gap:</b> “don’t load untrusted checkpoints” is advice; seeing <code>GLOBAL os system</code> sitting inside a model file is understanding.</p>
+      <p><b>What it does:</b> a dependency-free pickle-protocol disassembler that steps through a checkpoint’s opcodes on a stack machine and flags every import outside a weights-only allowlist, next to a safetensors header parser for contrast.</p>
+      <div class="ev-side"><span class="status status-ok">Runs in browser</span><a href="posts/pickle-is-a-program.html">Open it →</a></div>
+    </article>
+
+    <article class="card ev-item reveal">
       <h3>Upstream: Linux memory manager UAPI headers <code>PR #10</code></h3>
       <p><b>What changed:</b> fixed typos in the UAPI headers of an open-source Linux memory manager project. Small, and merged.</p>
       <div class="ev-side"><span class="status status-ok">Merged</span><a href="https://github.com/sachinites/LinuxMemoryManager/pull/10" target="_blank" rel="noopener">PR ↗</a></div>
@@ -236,10 +305,10 @@
   </div>
 </section>
 
-<!-- FOUNDATIONS -->
+<!-- FOUNDATIONS / TOOLBOX -->
 <section class="section" id="foundations">
   <div class="section-head">
-    <p class="section-kicker">Foundations</p>
+    <p class="section-kicker">Toolbox</p>
     <h2 class="section-title">Skill → the artifact that shows it</h2>
     <p class="section-lede">No self-ratings. Each area links to the repo or write-up behind it, with an honest stage.</p>
   </div>
@@ -248,6 +317,7 @@
     <table class="foundations">
       <thead><tr><th scope="col">Area</th><th scope="col">Stage</th><th scope="col">Evidence</th></tr></thead>
       <tbody>
+        <tr class="grp"><th colspan="3" scope="rowgroup">Systems &amp; networking</th></tr>
         <tr><td>Collectives &amp; NCCL</td><td>design + harness</td><td>
           <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput ↗</a>
           <a href="https://github.com/nareshns2004/distributed-training-framework-nccl" target="_blank" rel="noopener">distributed-training-framework-nccl ↗</a>
@@ -275,8 +345,32 @@
         <tr><td>Incident triage models</td><td>design</td><td>
           <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">qwen3-nccl-rca-lora model card ↗</a>
           <a href="posts/nccl-timeout-triage.html">NCCL triage post</a></td></tr>
+        <tr class="grp sec"><th colspan="3" scope="rowgroup">AI/ML infrastructure security</th></tr>
+        <tr><td>Threat modeling AI infra</td><td>write-up</td><td>
+          <a href="posts/ai-infra-breaches.html">breach field guide</a>
+          <a href="#security">layered threat map</a></td></tr>
+        <tr><td>AI agent &amp; tool-use security</td><td>write-up + design</td><td>
+          <a href="posts/agent-blast-radius.html">agent blast-radius simulator</a>
+          <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">goodput safety invariants ↗</a></td></tr>
+        <tr><td>Model &amp; checkpoint supply chain</td><td>runs in browser</td><td>
+          <a href="posts/pickle-is-a-program.html">pickle disassembler &amp; scanner</a></td></tr>
+        <tr><td>RDMA / fabric security</td><td>write-up + design</td><td>
+          <a href="posts/rdma-trust-model.html">RDMA trust-model post</a>
+          <a href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">kvwire ADR-0005: memory-window fencing ↗</a></td></tr>
+        <tr><td>Multi-tenant inference isolation</td><td>write-up</td><td>
+          <a href="posts/prefix-cache-side-channel.html">prefix-cache side-channel post</a></td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="toolbox reveal" aria-label="Tools and technologies">
+    <!-- No ratings by design (CLAUDE.md). TODO(naresh): prune anything here you can't defend in an interview. -->
+    <div class="tb-group"><h3>Fabric &amp; collectives</h3><p>NCCL · RDMA verbs · RoCE v2 · InfiniBand · GPUDirect RDMA · PFC / ECN / DCQCN · rail-optimized topologies · NVLink</p></div>
+    <div class="tb-group"><h3>Host datapath</h3><p>Linux networking · eBPF / XDP / tc · DPDK · SR-IOV · KVM / virtio · perf / ftrace</p></div>
+    <div class="tb-group"><h3>Training &amp; serving</h3><p>PyTorch · vLLM · CUDA · Triton · Ray · Slurm · Kubernetes · DCGM · Prometheus · Grafana</p></div>
+    <div class="tb-group sec"><h3>AI-infra security</h3><p>Threat modeling (STRIDE, MITRE ATLAS, OWASP LLM Top 10) · prompt-injection containment · MCP tool scoping · workload identity (SPIFFE/SPIRE) · Kubernetes RBAC, Pod Security &amp; admission control · eBPF runtime security (Falco, Tetragon)</p></div>
+    <div class="tb-group sec"><h3>Supply chain &amp; isolation</h3><p>safetensors · Sigstore / cosign · SLSA · SBOMs · secrets management · MIG · confidential computing (NVIDIA H100 CC, AMD SEV-SNP, Intel TDX) · IB partition keys · MACsec / IPsec offload · BlueField DPUs</p></div>
+    <div class="tb-group"><h3>Languages</h3><p>C · C++ · Python · Go · Bash</p></div>
   </div>
 </section>
 
@@ -289,35 +383,44 @@
 
   <div class="profiles-primary">
     <a class="card profile reveal" href="https://github.com/nareshns2004" target="_blank" rel="noopener" style="--pc:var(--ink)">
-      <div class="profile-top"><div class="profile-badge">GH</div><div><div class="profile-name">GitHub</div><div class="profile-handle">@nareshns2004</div></div></div>
+      <div class="profile-top"><div class="profile-badge"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div><div><div class="profile-name">GitHub</div><div class="profile-handle">@nareshns2004</div></div></div>
       <p class="profile-desc">goodput, kvwire, nicprof, kptk and the rest of the source behind this page.</p>
       <span class="profile-cta">View repositories ↗</span>
     </a>
     <a class="card profile reveal" href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener" style="--pc:var(--copper)">
-      <div class="profile-top"><div class="profile-badge">HF</div><div><div class="profile-name">Hugging Face</div><div class="profile-handle">@nareshns2004</div></div></div>
+      <div class="profile-top"><div class="profile-badge"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1.4446 11.5059c0 1.1021.1673 2.1585.4847 3.1563-.0378-.0028-.0691-.0058-.1058-.0058-.4209 0-.8015.16-1.0704.4512-.3454.3737-.4984.8335-.4316 1.293a1.576 1.576 0 0 0 .2148.5978c-.2319.1864-.4018.4456-.4844.7578-.0646.2448-.131.7543.2149 1.2794a1.4552 1.4552 0 0 0-.0625.1055c-.208.3923-.2207.8372-.0371 1.25.2783.6258.9696 1.1175 2.3126 1.6467.8356.3292 1.5988.5411 1.6056.543 1.1046.2847 2.104.4277 2.969.4277 1.4173 0 2.4754-.3849 3.1525-1.1446 1.538.2651 2.791.1403 3.592.006.6773.7555 1.7332 1.1387 3.1467 1.1387.8649 0 1.8643-.143 2.969-.4278.0068-.0019.77-.2138 1.6056-.543 1.343-.5292 2.0343-1.0208 2.3126-1.6466.1836-.4129.171-.8577-.037-1.25a1.4685 1.4685 0 0 0-.0626-.1056c.346-.525.2795-1.0346.2149-1.2793-.0826-.3122-.2525-.5714-.4844-.7579.11-.1816.1831-.3788.2148-.5977.0669-.4595-.0862-.9193-.4316-1.293-.2688-.2913-.6495-.4513-1.0704-.4513-.0209 0-.0376.0008-.0588.0018.3162-.9966.4846-2.0518.4846-3.1523 0-5.807-4.7362-10.5144-10.5789-10.5144-5.8426 0-10.5788 4.7073-10.5788 10.5144Zm10.5788-9.4831c5.2727 0 9.5476 4.246 9.5476 9.483a9.4201 9.4201 0 0 1-.2696 2.2365c-.0039-.0047-.0079-.011-.0117-.0156-.274-.3255-.6679-.5059-1.1075-.5059-.352 0-.714.1155-1.0763.3438-.2403.1517-.5058.422-.7793.7598-.2534-.3492-.608-.5832-1.0137-.6465a1.5174 1.5174 0 0 0-.2344-.0176c-.9263 0-1.4828.7993-1.6935 1.5177-.1046.2426-.6065 1.3482-1.3614 2.0978-1.1681 1.1601-1.4458 2.3534-.8396 3.6382-.843.1029-1.5836.0927-2.365-.006.5906-1.212.3626-2.4388-.8426-3.6322-.755-.7496-1.2568-1.8552-1.3614-2.0978-.2107-.7184-.7673-1.5177-1.6935-1.5177-.078 0-.1568.0054-.2344.0176-.4057.0633-.7604.2973-1.0137.6465-.2735-.3379-.539-.6081-.7794-.7598-.3622-.2283-.7243-.3438-1.0762-.3438-.4266 0-.8094.171-1.0821.4786a9.4208 9.4208 0 0 1-.2598-2.1936c0-5.237 4.2749-9.483 9.5475-9.483zM8.6443 7.0036c-.4838.0043-.9503.2667-1.1934.7227-.3536.6633-.1006 1.4873.5645 1.84.351.1862.4883-.5261.836-.6485.3107-.1095.841.399 1.0078.086.3536-.6634.1025-1.4874-.5625-1.84a1.3659 1.3659 0 0 0-.6524-.1602Zm6.8403 0c-.2199-.002-.4426.05-.6504.1602-.665.3526-.9181 1.1766-.5645 1.84.1669.313.6971-.1955 1.0079-.086.3476.1224.4867.8347.838.6485.6649-.3527.916-1.1767.5624-1.84-.243-.456-.7096-.7184-1.1934-.7227Zm-9.7565 1.418a.8768.8768 0 0 0-.877.877c0 .4846.3925.877.877.877a.8768.8768 0 0 0 .877-.877.8768.8768 0 0 0-.877-.877zm12.6434 0c-.4845 0-.879.3925-.879.877 0 .4846.3945.877.879.877a.8768.8768 0 0 0 .877-.877.8768.8768 0 0 0-.877-.877zM8.7927 11.459c-.179-.003-.2793.1107-.2793.416 0 .8097.3874 2.125 1.4279 2.924.207-.7123 1.3453-1.2832 1.5079-1.2012.2315.1167.2191.4417.6074.7266.3884-.285.374-.6098.6056-.7266.1627-.082 1.3009.4889 1.5079 1.2012 1.0404-.799 1.4278-2.1144 1.4278-2.924 0-1.2212-1.583.6402-3.5413.6485-1.4686-.0061-2.7266-1.0558-3.2639-1.0645zM4.312 14.4768c.5792.365 1.6964 2.2751 2.1056 3.0177.1371.2488.371.3536.582.3536.4188 0 .7465-.4138.0391-.9395-1.0636-.791-.6914-2.0846-.1836-2.1642a.4302.4302 0 0 1 .0664-.004c.4616 0 .666.7892.666.7892s.5959 1.4898 1.6213 2.508c.942.9356 1.062 1.703.4961 2.6661-.0164-.004-.0159.0236-.1484.2149-.1853.2673-.4322.4688-.7188.6152-.5062.2269-1.1397.2696-1.7833.2696-1.037 0-2.1017-.1824-2.6975-.336-.0293-.0075-3.6505-.9567-3.1916-1.8224.0771-.1454.2033-.2031.3633-.2031.6463 0 1.823.9551 2.3283.9551.113 0 .196-.0865.2285-.2031.2249-.8045-3.2787-1.0522-2.9846-2.1642.0519-.1967.193-.2757.3907-.2754.854 0 2.7704 1.4923 3.172 1.4923.0307 0 .0525-.0085.0645-.0274.2012-.3227.1096-.5865-1.3087-1.4395-1.4182-.8533-2.4315-1.329-1.8653-1.9416.0651-.0707.1574-.1015.2695-.1015.8611.0002 2.8948 1.84 2.8948 1.84s.5487.5683.8809.5683c.0762 0 .1416-.0315.1855-.1054.2355-.3946-2.1858-2.2183-2.3224-2.971-.0926-.51.0641-.7676.3555-.7676-.0006.008.1701-.0285.4942.1759zm16.2257.5918c-.1366.7526-2.5579 2.5764-2.3224 2.9709.044.074.1092.1055.1855.1055.3321 0 .881-.5684.881-.5684s2.0336-1.8397 2.8947-1.84c.1121 0 .2044.0308.2695.1016.5662.6125-.447 1.0882-1.8653 1.9415-1.4183.853-1.51 1.1168-1.3087 1.4396.012.0188.0337.0273.0644.0273.4016 0 2.3181-1.4923 3.1721-1.4923.1977-.0002.3388.0787.3907.2754.294 1.112-3.2095 1.3597-2.9846 2.1642.0325.1166.1156.2032.2285.2032.5054 0 1.682-.9552 2.3283-.9552.16 0 .2862.0577.3633.2032.459.8656-3.1623 1.8149-3.1916 1.8224-.5958.1535-1.6605.336-2.6975.336-.6351 0-1.261-.0409-1.7638-.2599-.2949-.1472-.5488-.3516-.7383-.625-.0411-.0682-.1026-.1476-.1426-.205-.5726-.9679-.455-1.7371.4903-2.676 1.0254-1.0182 1.6212-2.508 1.6212-2.508s.2044-.7891.666-.7891a.4318.4318 0 0 1 .0665.0039c.5078.0796.88 1.3732-.1836 2.1642-.7074.5257-.3797.9395.039.9395.211 0 .445-.1047.5821-.3535.4092-.7426 1.5264-2.6527 2.1056-3.0178.5588-.3524.99-.1816.8497.5918z"/></svg></div><div><div class="profile-name">Hugging Face</div><div class="profile-handle">@nareshns2004</div></div></div>
       <p class="profile-desc">Root-cause models for GPU-cluster incidents. Model cards first; weights and evals once goodput’s labeled data lands.</p>
       <span class="profile-cta">View profile ↗</span>
     </a>
     <a class="card profile reveal" href="https://leetcode.com/u/nareshns2004/" target="_blank" rel="noopener" style="--pc:var(--signal)">
-      <div class="profile-top"><div class="profile-badge">LC</div><div><div class="profile-name">LeetCode</div><div class="profile-handle">@nareshns2004</div></div></div>
+      <div class="profile-top"><div class="profile-badge"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z"/></svg></div><div><div class="profile-name">LeetCode</div><div class="profile-handle">@nareshns2004</div></div></div>
       <p class="profile-desc">Algorithms and data-structures practice.</p>
       <span class="profile-cta">View profile ↗</span>
     </a>
   </div>
 
+  <div class="socials reveal" aria-label="Social media">
+    <span class="socials-label">Elsewhere</span>
+    <a class="social" href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span>LinkedIn</span></a>
+    <a class="social" href="https://substack.com/@nareshns2004" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg><span>Substack</span></a>
+    <a class="social" href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span>YouTube</span></a>
+    <a class="social" href="https://hub.docker.com/u/nareshns2004" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></svg><span>Docker Hub</span></a>
+    <a class="social" href="https://x.com/naresh_swe24" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>@naresh_swe24</span></a>
+  </div>
 </section>
 
 <!-- CONTACT -->
 <section class="section" id="contact">
   <div class="card contact reveal">
     <span class="contact-badge"><span class="status-dot"></span>Open to roles</span>
-    <h2>Building training or inference clusters? Let’s talk.</h2>
-    <p>I’m looking for GPU cluster networking, distributed-training infrastructure and inference-platform roles at AI labs and infra teams.</p>
+    <h2>Building training or inference clusters that have to be fast <em>and</em> safe? Let’s talk.</h2>
+    <p>I’m looking for GPU cluster networking, distributed-training infrastructure, inference-platform and AI-infrastructure security roles at AI labs and infra teams.</p>
     <div class="contact-meta">
       <span class="chip">USA</span><span class="chip">Canada</span><span class="chip">Europe</span>
     </div>
     <div class="contact-cta">
       <a href="mailto:nareshns2004@gmail.com?subject=Opportunity%20for%20Naresh" class="btn btn-primary">Email me →</a>
+      <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener" class="btn btn-outline">LinkedIn ↗</a>
       <a href="https://github.com/nareshns2004" target="_blank" rel="noopener" class="btn btn-outline">GitHub ↗</a>
     </div>
   </div>
@@ -326,17 +429,24 @@
 </main>
 
 <footer class="footer">
-  <span>© Naresh Kumar · <a href="https://github.com/nareshns2004/portfolio-webapp" target="_blank" rel="noopener">source</a></span>
+  <span>© Naresh Kumar · <a href="https://github.com/nareshns2004/portfolio-webapp" target="_blank" rel="noopener">source</a> · press <kbd>⌘K</kbd> to jump</span>
   <div class="footer-links">
     <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
     <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
     <a href="https://leetcode.com/u/nareshns2004/" target="_blank" rel="noopener">LeetCode</a>
+    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://hub.docker.com/u/nareshns2004" target="_blank" rel="noopener">Docker Hub</a>
+    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
     <a href="#top">Back to top ↑</a>
   </div>
 </footer>
 
 <script src="assets/js/data.js"></script>
+<script src="assets/js/security-data.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/hero.js"></script>
+<script src="assets/js/threatmap.js"></script>
 </body>
 </html>

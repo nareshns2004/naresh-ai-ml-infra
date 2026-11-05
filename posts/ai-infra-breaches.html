@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field guide: how AI infrastructure actually gets breached — Naresh Kumar</title>
+<meta name="description" content="Eighteen public AI-infrastructure security incidents from 2021 to 2026, from ShadowRay and NVIDIAScape to pickle over ZeroMQ and EchoLeak, mapped to the stack layer they hit and the control that contains each one. Interactive timeline, every entry sourced.">
+<meta name="author" content="Naresh Kumar">
+<link rel="canonical" href="https://portfolio-webapp-roan.vercel.app/posts/ai-infra-breaches.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Field guide: how AI infrastructure actually gets breached">
+<meta property="og:description" content="Eighteen sourced incidents, six patterns, and the controls I would put in a new AI cluster first.">
+<meta property="og:url" content="https://portfolio-webapp-roan.vercel.app/posts/ai-infra-breaches.html">
+<meta property="og:image" content="https://portfolio-webapp-roan.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@naresh_swe24">
+<meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10151D" media="(prefers-color-scheme: dark)">
+<script>try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="icon" href="../assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/post.css">
+<style>.inc-card h3 { font-size: 1.05rem; margin: 0 0 0.35rem; color: var(--text); }
+  .inc-card .meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+  .inc-card p { margin: 0 0 0.5rem; }
+  .inc-card .src a { font-family: var(--font-mono); font-size: 0.75rem; margin-right: 0.9rem; }
+  .lane { fill: var(--paper-2); }
+  .lane-t { fill: var(--text-mid); font-size: 11px; font-weight: 600; }
+  .yr { stroke: var(--border); } .yr-t { fill: var(--text-dim); font-size: 10px; }
+  .dot { cursor: pointer; stroke: var(--paper); stroke-width: 2; transition: r 0.15s; }
+  .dot:hover, .dot:focus { r: 9; outline: none; }
+  .dot.sel { stroke: var(--ink); stroke-width: 2.5; }
+  .dot.dim { opacity: 0.15; }
+  .ring { fill: none; stroke: var(--ink); stroke-width: 1.2; opacity: 0; }
+  .ring.on { animation: ring 1.8s ease-out infinite; }
+  @keyframes ring { 0% { r: 7; opacity: 0.8; } 100% { r: 20; opacity: 0; } }
+  .k-exploited { color: var(--fault); } .k-incident { color: var(--copper); } .k-disclosed { color: var(--signal); } .k-research { color: var(--text-dim); }
+  .layer-block { border-top: 1.5px solid var(--ink); padding-top: 0.75rem; margin-top: 2rem; }
+  .layer-block .risk { color: var(--text-mid); }
+  .layer-block .ctl { font-family: var(--font-mono); font-size: 0.78rem; color: var(--signal); }
+  .layer-inc { border-left: 2px solid var(--border-bright); padding-left: 1rem; margin: 1rem 0; }
+  .layer-inc .h { font-weight: 600; }
+  .layer-inc .d { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); }
+  .layer-inc p { margin: 0.3rem 0; font-size: 0.97rem; }
+  .layer-inc .src a { font-family: var(--font-mono); font-size: 0.75rem; margin-right: 0.9rem; }
+  .first90 li { margin-bottom: 0.6rem; }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Field guide: how AI infrastructure actually gets breached", "author": {"@type": "Person", "name": "Naresh Kumar", "url": "https://portfolio-webapp-roan.vercel.app/"}, "datePublished": "2026-11-05", "keywords": "AI security, ML infrastructure security, ShadowRay, NVIDIAScape, pickle, prompt injection, MCP, RDMA security, vLLM CVE"}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../index.html"><span class="brand-mark" aria-hidden="true">NK</span>Naresh Kumar</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="../index.html#work">Work</a></li>
+      <li><a href="../index.html#security">Security</a></li>
+      <li><a href="../index.html#writing">Writing</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main" class="post">
+<a class="post-back" href="../index.html#writing">← All writing</a>
+  <header class="post-head">
+    <div class="chips"><span class="chip chip-fault">Security</span><span class="chip">▶ Interactive</span><span class="chip">18 sourced incidents</span></div>
+    <h1>Field guide: how AI infrastructure actually gets breached</h1>
+    <p class="post-dek">Almost none of these needed a novel exploit. They needed an API without authentication, a pickle, a token with too much scope, a privileged hook on a GPU host, or an agent that believed what it read.</p>
+    <p class="post-byline">Naresh Kumar · Nov 2026 · 12 min read</p>
+  </header>
+
+  <aside class="tldr">
+    <strong>TL;DR</strong>
+    <ul>
+      <li>AI infrastructure inherits every classic failure (unauthenticated control planes, over-scoped tokens, container escapes) and runs them on the most expensive hardware anyone owns.</li>
+      <li>It also adds new ones: <b>model files are programs</b>, <b>caches leak across tenants</b>, <b>the fabric bypasses the host</b>, and <b>agents take instructions from data</b>.</li>
+      <li>The controls that work sit <em>off</em> the hot path: code-free artifact formats, scoped short-lived identity, tool boundaries, tenant isolation in the NIC. They cost almost nothing per step, which is why they survive contact with a training deadline.</li>
+    </ul>
+  </aside>
+
+  <figure class="widget" aria-labelledby="w-tl">
+    <div class="widget-head">
+      <span class="widget-title" id="w-tl">AI-infra incidents by layer, 2021–2026</span>
+      <span class="widget-hint">Click or Tab to a dot · filter by kind</span>
+    </div>
+    <div class="btn-row" id="kinds" role="toolbar" aria-label="Filter incidents by kind"></div>
+    <div class="fig-scroll"><svg id="tl" viewBox="0 0 760 330" role="img" aria-label="Timeline of AI infrastructure incidents, one swimlane per stack layer"></svg></div>
+    <div class="legend">
+      <span><i style="background:var(--fault)"></i>exploited in the wild</span>
+      <span><i style="background:var(--copper)"></i>incident / exposure</span>
+      <span><i style="background:var(--signal)"></i>disclosed &amp; fixed</span>
+      <span><i style="background:var(--graphite)"></i>research / PoC</span>
+    </div>
+    <div class="callout inc-card" id="inc" aria-live="polite"></div>
+  </figure>
+
+  <div class="prose">
+    <h2>Six patterns</h2>
+    <h3>1. Control planes are remote code execution by design</h3>
+    <p>Ray’s job API, a Slurm controller and a Kubernetes API server all exist to run code on GPUs. <a href="https://www.oligo.security/blog/shadowray-attack-ai-workloads-actively-exploited-in-the-wild" target="_blank" rel="noopener">ShadowRay</a> is what happens when one is reachable without authentication: the vendor considers it intended behaviour, scanners skip “disputed” CVEs, and attackers run miners on your accelerators. Treat every orchestration endpoint as an RCE endpoint, because it is one.</p>
+
+    <h3>2. Artifacts are code</h3>
+    <p>A PyTorch checkpoint is a pickle, and unpickling is a stack machine that can import and call any function. Wiz ran code inside <a href="https://www.wiz.io/blog/wiz-and-hugging-face-address-risks-to-ai-infrastructure" target="_blank" rel="noopener">Hugging Face’s inference infrastructure</a> by uploading a model. PyTorch’s <code>weights_only=True</code> safe mode itself had an <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32434" target="_blank" rel="noopener">RCE bypass</a>. And the same mistake reappears on the network: vLLM’s Mooncake KV-transfer path <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32444" target="_blank" rel="noopener">unpickled data from ZeroMQ sockets bound to every interface</a>. <a href="pickle-is-a-program.html">Disassemble one yourself →</a></p>
+
+    <h3>3. The GPU stack is kernel attack surface</h3>
+    <p>The NVIDIA Container Toolkit runs privileged hooks on the host for every GPU container. Two container escapes in a year (<a href="https://www.cve.org/CVERecord?id=CVE-2024-0132" target="_blank" rel="noopener">CVE-2024-0132</a>, <a href="https://www.wiz.io/blog/nvidia-ai-vulnerability-cve-2025-23266-nvidiascape" target="_blank" rel="noopener">NVIDIAScape</a>) mean the container is not the tenant boundary on a shared GPU host. And GPU memory is shared state: <a href="https://blog.trailofbits.com/2024/01/16/leftoverlocals-listening-to-llm-responses-through-leaked-gpu-local-memory/" target="_blank" rel="noopener">LeftoverLocals</a> reconstructed another process’s LLM output from uncleared local memory.</p>
+
+    <h3>4. A token’s scope is its blast radius</h3>
+    <p>A link meant for downloading open models was an Azure SAS token with <a href="https://www.wiz.io/blog/38-terabytes-of-private-data-accidentally-exposed-by-microsoft-ai-researchers" target="_blank" rel="noopener">full control of 38 TB</a>, so it could also have overwritten the models. The <a href="https://invariantlabs.ai/blog/mcp-github-vulnerability" target="_blank" rel="noopener">GitHub MCP toxic flow</a> needed no exploit at all, just a token that could read every private repository. Scope is a security control you can set today, for free.</p>
+
+    <h3>5. Agents take instructions from data</h3>
+    <p><a href="https://www.cve.org/CVERecord?id=CVE-2025-32711" target="_blank" rel="noopener">EchoLeak</a> steered Copilot with an email. A malicious commit put a <a href="https://aws.amazon.com/security/security-bulletins/AWS-2025-015/" target="_blank" rel="noopener">wiper prompt into a shipped coding agent</a>. The <a href="https://nx.dev/blog/s1ngularity-postmortem" target="_blank" rel="noopener">Nx malware</a> didn’t bring its own scanner; it drove the AI CLI already on the machine. And <a href="https://www.anthropic.com/news/disrupting-AI-espionage" target="_blank" rel="noopener">GTG-1002</a> shows attackers now operate at agent speed. You can’t filter every injection, so limit what a fooled agent can do. <a href="agent-blast-radius.html">Measure the blast radius →</a></p>
+
+    <h3>6. Performance shortcuts become side channels</h3>
+    <p>Prefix caching shares work across requests. If requests come from different tenants, a cache hit is observable as a faster time-to-first-token (<a href="https://arxiv.org/abs/2409.20002" target="_blank" rel="noopener">Early Bird</a>, <a href="https://github.com/advisories/GHSA-4qjh-9fv9-r85r" target="_blank" rel="noopener">vLLM advisory</a>). The fix, a per-tenant salt in the cache key, already exists in vLLM, but it is opt-in. <a href="prefix-cache-side-channel.html">Run the attack →</a> Underneath all of it, the fabric’s own access control is a guessable capability, not cryptography (<a href="https://www.usenix.org/conference/usenixsecurity21/presentation/rothenberger" target="_blank" rel="noopener">ReDMArk</a>). <a href="rdma-trust-model.html">RDMA’s trust model →</a></p>
+
+    <h2>What I would put in a new AI cluster first</h2>
+    <p>Ordered by blast radius removed per unit of engineering effort, cheapest first. None of these touches the training step’s hot path.</p>
+    <ol class="first90">
+      <li><b>No public control planes.</b> Ray, Slurm, Kubernetes, Triton, vLLM and dashboards on private networks only, with authentication even there. Closes ShadowRay-class exposure.</li>
+      <li><b>Short-lived, least-scope credentials everywhere.</b> One task, one scope. No account-wide storage tokens, no cluster-admin kubeconfigs on laptops or in agents.</li>
+      <li><b>safetensors only for anything you didn’t produce</b>, and hashes plus signatures on everything you did. No pickle on any network path, including internal RPC and KV transfer.</li>
+      <li><b>Agents get read-only tools by default.</b> Mutations go through an allowlisted, audited executor; destructive actions need a human. Egress allowlists on agent sandboxes.</li>
+      <li><b>Patch the GPU container stack like the kernel</b>, and keep untrusted images off shared GPU hosts. Use VMs, MIG or confidential computing where tenants don’t trust each other.</li>
+      <li><b>Tenant isolation in the fabric</b>: partition keys or VRFs per tenant, scoped and revocable memory windows, inline encryption where the NIC offloads it, telemetry at the NIC or DPU.</li>
+      <li><b>Per-tenant cache isolation</b> in serving (salted prefix-cache keys), egress allowlists on inference pods, and memory scrubbing on GPU reassignment.</li>
+      <li><b>Detection at agent speed</b>: alert on new job types, new egress destinations and new token scopes in minutes, not on next week’s audit.</li>
+    </ol>
+  </div>
+
+  <section class="prose" id="by-layer">
+    <h2>Every incident, by layer</h2>
+    <div id="layers"></div>
+  </section>
+
+  <aside class="assumptions">
+    <h2>Model &amp; assumptions</h2>
+    <ul>
+      <li>Public, sourced incidents only. This is a curated set chosen to cover each layer, not a complete census. Each entry links its advisory, CVE record or the researchers’ own write-up.</li>
+      <li>Dates are the month of public disclosure (for ReDMArk, publication), not when the issue was introduced.</li>
+      <li>“Kind” follows the sources: <em>exploited</em> only where a source reports exploitation in the wild; <em>research</em> for proofs of concept and papers; <em>disclosed</em> for vendor-fixed vulnerabilities; <em>incident</em> for exposures or compromises without a CVE.</li>
+      <li>The “lesson” lines and the first-90-days list are my engineering judgement, not claims from the sources.</li>
+    </ul>
+  </aside>
+
+  <section class="post-end">
+    <h2>Keep going</h2>
+    <div class="post-end-grid">
+      <a class="card" href="agent-blast-radius.html"><div class="k">Next · interactive</div><div class="v">The blast radius of an AI agent</div></a>
+      <a class="card" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput’s safety invariants: default-deny fault injection ↗</div></a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© Naresh Kumar · <a href="../index.html">Home</a> · press <kbd>⌘K</kbd> to jump</span>
+  <div class="footer-links">
+    <a href="https://github.com/nareshns2004" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://huggingface.co/nareshns2004" target="_blank" rel="noopener">Hugging Face</a>
+    <a href="https://www.linkedin.com/in/nareshns2004/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://substack.com/@nareshns2004" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.youtube.com/@nareshns2004" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://x.com/naresh_swe24" target="_blank" rel="noopener">X</a>
+  </div>
+</footer>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/security-data.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/post.js"></script>
+<script>
+(function () {
+  const L = window.SEC_LAYERS, I = window.SEC_INCIDENTS.map((x, i) => ({ ...x, i }));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const COL = { exploited: 'var(--fault)', incident: 'var(--copper)', disclosed: 'var(--signal)', research: 'var(--graphite)' };
+  const KIND = { exploited: 'exploited in the wild', incident: 'incident', disclosed: 'disclosed · fixed', research: 'research' };
+  const fmt = d => new Date(d + '-01T00:00:00').toLocaleDateString('en', { month: 'long', year: 'numeric' });
+  const svg = P.$('#tl');
+  const X0 = 190, X1 = 745, Y0 = 28, LH = 48;
+  const t0 = 2021, t1 = 2027;
+  const tx = d => { const [y, m] = d.split('-').map(Number); return X0 + ((y + (m - 0.5) / 12) - t0) / (t1 - t0) * (X1 - X0); };
+  const laneY = id => Y0 + L.findIndex(l => l.id === id) * LH + LH / 2;
+  let active = new Set(Object.keys(KIND)), sel = I.length - 1;
+
+  function draw() {
+    svg.innerHTML = '';
+    L.forEach((l, i) => {
+      P.svg('rect', { x: 0, y: Y0 + i * LH + 4, width: 760, height: LH - 8, rx: 3, class: 'lane' }, svg);
+      P.svg('text', { x: 10, y: Y0 + i * LH + LH / 2 + 4, class: 'lane-t' }, svg).textContent = `${l.short} · ${l.name.split(' & ')[0]}`;
+    });
+    for (let y = t0; y <= t1; y++) {
+      const x = X0 + (y - t0) / (t1 - t0) * (X1 - X0);
+      P.svg('line', { x1: x, y1: Y0 - 6, x2: x, y2: Y0 + L.length * LH, class: 'yr' }, svg);
+      if (y < t1) P.svg('text', { x: x + 4, y: Y0 - 10, class: 'yr-t' }, svg).textContent = y;
+    }
+    // nudge dots that share a lane and month
+    const seen = {};
+    I.forEach(x => {
+      const key = x.layer + x.date; const k = seen[key] = (seen[key] || 0) + 1;
+      const cx = tx(x.date) + (k - 1) * 13, cy = laneY(x.layer);
+      if (x.i === sel) P.svg('circle', { cx, cy, r: 7, class: 'ring on' }, svg);
+      const c = P.svg('circle', { cx, cy, r: 7, fill: COL[x.kind], class: 'dot' + (x.i === sel ? ' sel' : '') + (active.has(x.kind) ? '' : ' dim'),
+        tabindex: active.has(x.kind) ? 0 : -1, role: 'button', 'aria-label': `${x.date}: ${x.name}, ${KIND[x.kind]}` }, svg);
+      c.addEventListener('click', () => pick(x.i));
+      c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(x.i); } });
+    });
+  }
+  function card() {
+    const x = I[sel], l = L.find(l => l.id === x.layer);
+    P.$('#inc').innerHTML = `<div class="meta">${esc(fmt(x.date))} · ${esc(l.short)} ${esc(l.name)} · <span class="k-${x.kind}">${esc(KIND[x.kind])}</span></div>
+      <h3>${esc(x.name)}</h3><p>${esc(x.what)}</p><p><b>Lesson:</b> ${esc(x.lesson)}</p>
+      <p class="src">${x.src.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p>`;
+  }
+  function pick(i) {
+    sel = i; draw(); card();
+    const d = svg.querySelector('.dot.sel'); if (d && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('dot')) d.focus();
+  }
+  const kinds = P.$('#kinds');
+  kinds.innerHTML = Object.entries(KIND).map(([k, t]) =>
+    `<button class="wbtn" type="button" aria-pressed="true" data-k="${k}">${esc(t)} · ${I.filter(x => x.kind === k).length}</button>`).join('');
+  kinds.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const k = b.dataset.k, on = b.getAttribute('aria-pressed') === 'true';
+    if (on && active.size === 1) return;
+    on ? active.delete(k) : active.add(k);
+    b.setAttribute('aria-pressed', String(!on));
+    if (!active.has(I[sel].kind)) { const n = [...I].reverse().find(x => active.has(x.kind)); if (n) sel = n.i; }
+    draw(); card();
+  });
+  draw(); card();
+
+  // By-layer write-ups (anchors #layer-<id> are linked from the homepage threat map)
+  P.$('#layers').innerHTML = L.map(l => {
+    const inc = I.filter(x => x.layer === l.id).sort((a, b) => a.date.localeCompare(b.date));
+    return `<div class="layer-block" id="layer-${l.id}"><h3>${esc(l.short)} · ${esc(l.name)}</h3>
+      <p class="risk">${esc(l.risk)}</p><p class="ctl">Controls: ${l.controls.map(esc).join(' · ')}</p>
+      ${inc.map(x => `<div class="layer-inc"><div class="d">${esc(fmt(x.date))} · <span class="k-${x.kind}">${esc(KIND[x.kind])}</span></div>
+        <div class="h">${esc(x.name)}</div><p>${esc(x.what)}</p><p><b>Lesson:</b> ${esc(x.lesson)}</p>
+        <p class="src">${x.src.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p></div>`).join('')}</div>`;
+  }).join('');
+  if (location.hash.startsWith('#layer-')) { const t = document.getElementById(location.hash.slice(1)); if (t) setTimeout(() => t.scrollIntoView(), 50); }
+})();
+</script>
+</body>
+</html>

@@ -28,7 +28,7 @@ Backlog from CLAUDE.md, ordered by impact.
 - [ ] Add the security posts' one-line claims to goodput / kvwire READMEs where they belong (e.g. goodput RCA tier "recommends, never acts" is marked planned on the site; land it in the repo's design docs).
 - [ ] When kvwire decides ADR-0005 (memory-window fencing), update the Trust block and the RDMA post with the measured bind cost.
 - [ ] Profile README badge still says `naresh.infra`; rename to match the site.
-- [x] **Contact refresh** (`feature/contact-socials-timeless-bio`): socials row moved from Profiles to Contact, replacing the email / LinkedIn / GitHub buttons; each role type links to its proof; hero bio no longer states a year count.
+- [x] **Contact refresh** (`feature/contact-socials-timeless-bio`): socials row moved from Profiles to the homepage footer with a new Gmail link, replacing the footer text links and the contact buttons; each role type links to its proof; hero bio no longer states a year count.
 
 ## Open questions for Naresh
 

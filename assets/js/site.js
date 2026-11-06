@@ -135,7 +135,7 @@
   const ext = u => ({ go: () => window.open(u, '_blank', 'noopener') });
   const items = [
     ...[['Work', '#work'], ['Security · threat map', '#security'], ['Writing', '#writing'], ['Evidence', '#evidence'],
-        ['Toolbox', '#foundations'], ['Profiles & socials', '#profiles'], ['Contact', '#contact']]
+        ['Toolbox', '#foundations'], ['Profiles', '#profiles'], ['Contact', '#contact']]
       .map(([t, h]) => ({ k: 'section', t, go: () => { location.href = href(h); } })),
     ...(window.POSTS || []).map(p => ({ k: p.tag, t: p.title, go: () => { location.href = new URL(p.url, ROOT).href; } })),
     { k: 'repo', t: 'goodput: fault-tolerant training orchestrator', ...ext('https://github.com/nareshns2004/fault-tolerant-training-orchestrator') },

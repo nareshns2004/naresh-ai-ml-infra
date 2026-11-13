@@ -37,7 +37,7 @@ Backlog from CLAUDE.md, ordered by impact.
 - **vLLM PR #50618**: on GitHub it's by JohnQinAMD and unmerged. Did you contribute under another account, or is it a different PR number? Send the link and it becomes the first proof item.
 - Links for the **cudagraph padding issue** and the **libbpf BTF fix**, if they exist.
 - ~~Hero line~~: done, blend of A + C.
-- **Hugging Face:** the profile has one model repo (`qwen3-nccl-rca-lora`, README only) and no Spaces. If `infra-incident-intel` or the Spaces are private rather than gone, make them public and re-link.
+- ~~Hugging Face~~: done 13 Nov 2026. Four planned artifacts linked (model + Space from goodput, dataset + Space from kvwire); `infra-incident-intel` is dropped for good.
 - The removed write-ups (DPDK, virtualization, LLM OS, AI infra roadmap essays; XDP / DPDK PMD / RDMA / RoCE / SR-IOV drafts): rebuild any worth keeping as an on-site post, or add as `kind: "external"` in `data.js`.
 
 Next session starts with: review the Vercel preview of `feature/contact-socials-timeless-bio`, then prune the Toolbox list and work through the open questions above (vLLM PR link) and the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl.

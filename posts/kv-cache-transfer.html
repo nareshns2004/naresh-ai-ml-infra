@@ -143,7 +143,7 @@
     <p>Layer <code>i</code>’s KV is final as soon as layer <code>i</code> finishes, so a transport can send it while layer <code>i+1</code> computes. When per-layer transfer time is below per-layer compute time, only the last layer’s transfer is exposed. When it isn’t, the backlog grows layer by layer and adds straight to TTFT. Try <strong>Llama 2 7B (MHA)</strong> on a 100 Gb/s NIC: it becomes link-bound. Then switch to Llama 3.1 8B (same size, GQA) or to FP8 KV, and the exposure shrinks to almost nothing. Large GQA models like the 70B keep up comfortably, because they do far more compute per KV byte.</p>
 
     <h2>What the calculator leaves out</h2>
-    <p>The arithmetic is the easy part. These are the parts I’m building <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a> to measure:</p>
+    <p>The arithmetic is the easy part. These are the parts I’m building <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a> to measure:</p>
     <ul>
       <li><strong>Layout mismatch.</strong> Paged KV caches scatter a sequence across many small blocks. Moving thousands of small blocks means many small RDMA writes that never reach link efficiency, unless the transport gathers them or a kernel re-lays them out first.</li>
       <li><strong>Different parallelism on each side.</strong> Prefill at TP=8 handing off to decode at TP=2 means re-sharding in flight.</li>
@@ -168,7 +168,7 @@
     <h2>Keep going</h2>
     <div class="post-end-grid">
       <a class="card" href="pfc-deadlock.html"><div class="k">Next · interactive</div><div class="v">PFC: the lossless network that can freeze itself</div></a>
-      <a class="card" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: RDMA KV-cache transport ↗</div></a>
+      <a class="card" href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: RDMA KV-cache transport ↗</div></a>
     </div>
   </section>
 </main>

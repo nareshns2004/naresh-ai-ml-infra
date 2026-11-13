@@ -143,7 +143,7 @@
       <li><strong>Separate victims from causes.</strong> Back-pressure spreads, so the noisiest counters can sit on innocent ports (see <a href="pfc-deadlock.html">PFC</a>).</li>
       <li><strong>Choose the smallest safe action</strong> for what you found, then resume.</li>
     </ol>
-    <p>None of this is exotic, but done by hand it takes a person, many dashboards and a lot of minutes per incident. Automating it is the core of <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a>: capture flight-recorder signatures, join them with DCGM and NIC telemetry on a topology map, and output a culprit with its evidence. <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof</a> already does the NIC-counter half for slowdowns, and the <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">qwen3-nccl-rca-lora</a> model card on Hugging Face describes how I plan to learn the log-reading half.</p>
+    <p>None of this is exotic, but done by hand it takes a person, many dashboards and a lot of minutes per incident. Automating it is the core of <a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a>: capture flight-recorder signatures, join them with DCGM and NIC telemetry on a topology map, and output a culprit with its evidence. <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof</a> already does the NIC-counter half for slowdowns, and the <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">qwen3-nccl-rca-lora</a> model card on Hugging Face describes how I plan to learn the log-reading half.</p>
   </div>
 
   <aside class="assumptions">
@@ -159,7 +159,7 @@
     <h2>Keep going</h2>
     <div class="post-end-grid">
       <a class="card" href="checkpoint-interval.html"><div class="k">Next · interactive</div><div class="v">How often should a 16K-GPU job checkpoint?</div></a>
-      <a class="card" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput: fault attribution &amp; recovery ↗</div></a>
+      <a class="card" href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput: fault attribution &amp; recovery ↗</div></a>
     </div>
   </section>
 </main>

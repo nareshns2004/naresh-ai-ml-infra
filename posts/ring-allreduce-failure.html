@@ -169,7 +169,7 @@
 
     <h2>Why it matters for recovery</h2>
     <p>Without attribution, the only safe move is to restart the whole job from the last checkpoint. Every rank pays for process start, CUDA and NCCL init, checkpoint load and warmup, plus the work since the last checkpoint, and the job may land on the same bad link again. With attribution, smaller recoveries become safe: drain one node, re-initialize communicators, and restore from a peer’s in-memory copy. How often you should checkpoint depends on all of this; there’s <a href="checkpoint-interval.html">a calculator for that</a>.</p>
-    <p>This is what I’m building in <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a>: fault injection with ground truth, flight-recorder signature capture, cross-layer correlation, and topology-aware recovery. It’s at milestone 1 of 6, with the design and harness in public and no results yet.</p>
+    <p>This is what I’m building in <a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a>: fault injection with ground truth, flight-recorder signature capture, cross-layer correlation, and topology-aware recovery. It’s at milestone 1 of 6, with the design and harness in public and no results yet.</p>
   </div>
 
   <aside class="assumptions">
@@ -185,7 +185,7 @@
     <h2>Keep going</h2>
     <div class="post-end-grid">
       <a class="card" href="nccl-timeout-triage.html"><div class="k">Next · interactive</div><div class="v">Reading the crime scene: triaging an NCCL timeout</div></a>
-      <a class="card" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput: fault attribution &amp; recovery ↗</div></a>
+      <a class="card" href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">goodput: fault attribution &amp; recovery ↗</div></a>
     </div>
   </section>
 </main>

@@ -1,4 +1,4 @@
-# portfolio-webapp
+# naresh-webapp
 
 Portfolio site for Naresh Kumar: secure AI/ML infrastructure: GPU cluster networking, distributed training and zero trust for AI systems.
 Live: https://portfolio-webapp-roan.vercel.app

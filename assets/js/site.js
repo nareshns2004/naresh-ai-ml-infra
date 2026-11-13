@@ -138,8 +138,12 @@
         ['Toolbox', '#foundations'], ['Profiles', '#profiles'], ['Contact', '#contact']]
       .map(([t, h]) => ({ k: 'section', t, go: () => { location.href = href(h); } })),
     ...(window.POSTS || []).map(p => ({ k: p.tag, t: p.title, go: () => { location.href = new URL(p.url, ROOT).href; } })),
-    { k: 'repo', t: 'goodput: fault-tolerant training orchestrator', ...ext('https://github.com/nareshns2004/fault-tolerant-training-orchestrator') },
-    { k: 'repo', t: 'kvwire: disaggregated inference engine', ...ext('https://github.com/nareshns2004/disaggregated-inference-engine') },
+    { k: 'repo', t: 'goodput: fault-tolerant training orchestrator', ...ext('https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator') },
+    { k: 'repo', t: 'kvwire: disaggregated inference engine', ...ext('https://github.com/nareshns2004/kvwire-disaggregated-inference-engine') },
+    { k: 'model', t: 'qwen3-nccl-rca-lora: NCCL root-cause model', ...ext('https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora') },
+    { k: 'space', t: 'nccl-incident-rca: incident triage Space', ...ext('https://huggingface.co/spaces/nareshns2004/nccl-incident-rca') },
+    { k: 'dataset', t: 'rdma-kv-transfer-traces: KV-transfer dataset', ...ext('https://huggingface.co/datasets/nareshns2004/rdma-kv-transfer-traces') },
+    { k: 'space', t: 'disagg-kv-explorer: move or recompute KV', ...ext('https://huggingface.co/spaces/nareshns2004/disagg-kv-explorer') },
     { k: 'repo', t: 'nicprof: NIC counter → step-time attribution', ...ext('https://github.com/nareshns2004/ai-nic-performance-profiler') },
     { k: 'repo', t: 'kptk: kernel performance toolkit', ...ext('https://github.com/nareshns2004/kernel-performance-toolkit') },
     { k: 'profile', t: 'GitHub', ...ext('https://github.com/nareshns2004') },
@@ -216,6 +220,6 @@
   // For the engineers who open DevTools first.
   try {
     console.log('%c NK %c Reading the source? Good instinct.', 'background:#1D4ED8;color:#fff;font-weight:700;padding:2px 6px;border-radius:3px', 'font-weight:600');
-    console.log('No framework, no build step, no trackers. Source: https://github.com/nareshns2004/portfolio-webapp\nHiring for GPU infra or AI-infra security? ' + EMAIL);
+    console.log('No framework, no build step, no trackers. Source: https://github.com/nareshns2004/naresh-webapp\nHiring for GPU infra or AI-infra security? ' + EMAIL);
   } catch (e) { /* no console */ }
 })();

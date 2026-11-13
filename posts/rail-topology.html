@@ -126,7 +126,7 @@
     <ul>
       <li><strong>Blast radius.</strong> On rails, a bad rail switch or cable hits one GPU index on many nodes, the “rail-3 ranks are stuck” signature in my <a href="nccl-timeout-triage.html">triage drill</a>. On ToR, a bad leaf takes whole nodes.</li>
       <li><strong>Congestion.</strong> Spine links are where flows from unrelated jobs meet. Keeping collectives leaf-local reduces how often <a href="pfc-deadlock.html">pause back-pressure</a> spreads between them.</li>
-      <li><strong>Attribution.</strong> Mapping “rank 11 is slow” to “node 1, NIC mlx5_3, rail switch 3, port 1” is exactly the topology join that <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof</a> and <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a> depend on.</li>
+      <li><strong>Attribution.</strong> Mapping “rank 11 is slow” to “node 1, NIC mlx5_3, rail switch 3, port 1” is exactly the topology join that <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof</a> and <a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput</a> depend on.</li>
     </ul>
   </div>
 

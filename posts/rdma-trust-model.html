@@ -133,7 +133,7 @@
   <div class="prose">
     <h2>Reading the calculator</h2>
     <p>At full 32-bit entropy, a modest guess rate and a handful of long-lived regions, an off-path attacker gets there in days, and “registered at startup” means the key lives longer than that. Drop the effective entropy (key generation that is less random than it looks was one of <a href="https://github.com/spcl/redmark" target="_blank" rel="noopener">ReDMArk’s findings</a>) and it’s minutes. The lever that changes the shape of the curve is <strong>lifetime</strong>. A type-2 memory window, bound per transfer and invalidated when the transfer ends, turns a server-lifetime capability into a milliseconds-lifetime one.</p>
-    <p>That isn’t only a security property. It is the same mechanism that stops a <em>delayed</em> write from a timed-out transfer from landing in a KV block that has since been reused: the NIC rejects it with a remote access error. In <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a> this is <a href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">ADR-0005</a>: per-transfer memory windows are the first option for stale-write fencing, to be decided on measured bind cost. Correctness and security want the same thing here, which is the best kind of security control: it pays for itself.</p>
+    <p>That isn’t only a security property. It is the same mechanism that stops a <em>delayed</em> write from a timed-out transfer from landing in a KV block that has since been reused: the NIC rejects it with a remote access error. In <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a> this is <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">ADR-0005</a>: per-transfer memory windows are the first option for stale-write fencing, to be decided on measured bind cost. Correctness and security want the same thing here, which is the best kind of security control: it pays for itself.</p>
 
     <h2>The controls, at the layer that can enforce them</h2>
     <table>
@@ -164,7 +164,7 @@
     <h2>Keep going</h2>
     <div class="post-end-grid">
       <a class="card" href="prefix-cache-side-channel.html"><div class="k">Next · interactive</div><div class="v">Your prompt cache is a side channel</div></a>
-      <a class="card" href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/TRANSPORT.md" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire transport design: memory registration &amp; fencing ↗</div></a>
+      <a class="card" href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/blob/main/docs/TRANSPORT.md" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire transport design: memory registration &amp; fencing ↗</div></a>
     </div>
   </section>
 </main>

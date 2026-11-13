@@ -1,4 +1,4 @@
-# portfolio-webapp — instructions for Claude Code
+# naresh-webapp — instructions for Claude Code
 
 Put this file at the repo root as `CLAUDE.md`. Read it fully at the start of every session.
 
@@ -31,8 +31,8 @@ I'm a GPU cluster networking and distributed-training infrastructure engineer wo
 The site's one job is to turn a glance into a click on verifiable proof: a repo, a merged PR, a model card, a write-up. It is a funnel into proof-of-work, not a learning journal or a résumé.
 
 The story is three-part (security added Nov 2026), mirroring how AI lab infra orgs are organized:
-- **Reliability at scale**: fault-tolerant training orchestrator (fault injection, NCCL timeout signatures, DCGM telemetry, topology-aware checkpoint-restart), plus the Hugging Face incident classifier and root-cause reasoning model.
-- **Efficiency at scale**: disaggregated inference engine (prefill/decode pools, RDMA KV-cache transfer, Triton fused attention).
+- **Reliability at scale**: goodput (repo `goodput-fault-tolerant-training-orchestrator`, GitHub Project 1): fault injection, NCCL timeout signatures, DCGM telemetry, topology-aware checkpoint-restart. Hugging Face Project 1: `qwen3-nccl-rca-lora` model (one model only; no ModernBERT tier) + `nccl-incident-rca` Space.
+- **Efficiency at scale**: kvwire (repo `kvwire-disaggregated-inference-engine`, GitHub Project 2): prefill/decode pools, RDMA KV-cache transfer, Triton KV re-layout kernel (not fused attention). Hugging Face Project 2: `rdma-kv-transfer-traces` dataset + `disagg-kv-explorer` Space.
 - **Trust at scale**: secure AI/ML infrastructure: zero trust for GPU fabrics (RDMA trust model, memory windows), model artifacts (pickle vs safetensors), multi-tenant serving (prefix-cache side channels) and AI agents (blast radius, gated executors). Evidence: goodput's SECURITY.md invariants, kvwire ADR-0005, and the five security posts.
 
 Kernel/eBPF/DPDK/RDMA depth is the *foundation* that makes all three stories credible. It is not the headline.

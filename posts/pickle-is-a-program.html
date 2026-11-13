@@ -138,7 +138,7 @@
     <p>An allowlist is the right idea if you must read pickle. <code>torch.load</code> now defaults to <code>weights_only=True</code>, which permits only tensor-rebuilding globals. But an allowlist in front of a stack machine is a sandbox, and sandboxes get bypassed: in PyTorch 2.5.1 and earlier, <code>weights_only=True</code> could still be driven to <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32434" target="_blank" rel="noopener">remote code execution</a>. The safe position is a format with no code path at all.</p>
 
     <h2>It isn’t only files</h2>
-    <p>The same deserializer shows up on the wire. vLLM’s Mooncake integration moved KV-cache metadata between prefill and decode nodes with pickle over ZeroMQ sockets bound to every interface, which made it an <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32444" target="_blank" rel="noopener">unauthenticated RCE</a> on the inference fabric. And Wiz ran code inside <a href="https://www.wiz.io/blog/wiz-and-hugging-face-address-risks-to-ai-infrastructure" target="_blank" rel="noopener">Hugging Face’s inference infrastructure</a> simply by uploading a pickle model. It’s the rule I’m holding <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a>’s control path to as it’s built: KV transfer is a network service, so its metadata gets a fixed schema and a code-free encoding.</p>
+    <p>The same deserializer shows up on the wire. vLLM’s Mooncake integration moved KV-cache metadata between prefill and decode nodes with pickle over ZeroMQ sockets bound to every interface, which made it an <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-32444" target="_blank" rel="noopener">unauthenticated RCE</a> on the inference fabric. And Wiz ran code inside <a href="https://www.wiz.io/blog/wiz-and-hugging-face-address-risks-to-ai-infrastructure" target="_blank" rel="noopener">Hugging Face’s inference infrastructure</a> simply by uploading a pickle model. It’s the rule I’m holding <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">kvwire</a>’s control path to as it’s built: KV transfer is a network service, so its metadata gets a fixed schema and a code-free encoding.</p>
     <!-- TODO(naresh): record the code-free control-path encoding in kvwire docs/TRANSPORT.md, then link it here. -->
 
     <h2>What I’d enforce</h2>
@@ -164,7 +164,7 @@
     <h2>Keep going</h2>
     <div class="post-end-grid">
       <a class="card" href="rdma-trust-model.html"><div class="k">Next · interactive</div><div class="v">The kernel can’t see your tensors: RDMA’s trust model</div></a>
-      <a class="card" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: KV-cache transport for disaggregated inference ↗</div></a>
+      <a class="card" href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener"><div class="k">Repo</div><div class="v">kvwire: KV-cache transport for disaggregated inference ↗</div></a>
     </div>
   </section>
 </main>

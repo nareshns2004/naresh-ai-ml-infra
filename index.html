@@ -124,7 +124,7 @@
 <!-- TODO(naresh): upstream slot. CLAUDE.md cites vLLM PR #50618, but on GitHub that PR is by JohnQinAMD and is unmerged.
      Send the link to your own merged PR (or the cudagraph padding issue) and it goes here as the first proof item. -->
 <section class="proof" aria-label="Proof of work">
-  <a class="card proof-item reveal" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">
+  <a class="card proof-item reveal" href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">
     <div class="proof-kicker"><span>Repo · reliability</span><span>↗</span></div>
     <div class="proof-fact">goodput: fault attribution &amp; recovery for multi-node training</div>
     <div class="proof-sub">Design, interfaces, test harness public. M1 of 6.</div>
@@ -134,7 +134,7 @@
     <div class="proof-fact">nicprof: which NIC counter explains which millisecond of step time</div>
     <div class="proof-sub"><code class="mono">nicprof demo</code> · 69 tests</div>
   </a>
-  <a class="card proof-item reveal" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">
+  <a class="card proof-item reveal" href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">
     <div class="proof-kicker"><span>Repo · efficiency</span><span>↗</span></div>
     <div class="proof-fact">kvwire: RDMA KV-cache transport for disaggregated inference</div>
     <div class="proof-sub">vLLM KV-connector plug-in. M1 in progress.</div>
@@ -168,12 +168,13 @@
         <div><dt>Why it’s hard</dt><dd>Symptoms are global and causes are local. Stock tooling detects in minutes, attributes nothing, and restarts the whole job, sometimes onto the same broken hardware.</dd></div>
         <div><dt>Approach</dt><dd>Inject faults with a ground-truth ledger, capture NCCL flight-recorder signatures, and correlate them with DCGM and NIC telemetry to name the <strong>culprit rank and component</strong>. Correct attribution makes small recoveries safe: re-init communicators in-process, replace one node, or restore from a peer’s in-memory checkpoint.</dd></div>
         <div><dt>Status</dt><dd><span class="status status-wip">M1 of 6 · in progress</span> &nbsp;No results measured yet; every future number will link to a run.</dd></div>
-        <div><dt>Models</dt><dd>The injector’s ledger labels every incident by construction. That data trains two Hugging Face models that plug back in as goodput’s classifier: a <strong>calibrated, evidence-citing triage tier</strong> (ModernBERT, milliseconds on CPU) and a <strong>grounded root-cause tier</strong> (Qwen3 + LoRA, RL on rewards a script can check). To take the slot, they must beat goodput’s own rules. <span class="status status-early">design</span></dd></div>
+        <div><dt>Hugging Face</dt><dd>The injector’s ledger labels every incident by construction. That data trains one model, a <strong>grounded root-cause tier</strong> (Qwen3 + LoRA) whose verdicts cite evidence ids, so a script scores every answer against the ledger. A Space adds a <strong>signature-matching fast tier</strong>. To take goodput’s classifier slot, the model must beat goodput’s own rules, the zero-shot base model and a majority baseline. <span class="status status-early">design</span></dd></div>
       </dl>
       <div class="problem-links">
-        <a class="primary" href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">Repo ↗</a>
+        <a class="primary" href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">Repo ↗</a>
         <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof ↗</a>
         <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">RCA model card ↗</a>
+        <a href="https://huggingface.co/spaces/nareshns2004/nccl-incident-rca" target="_blank" rel="noopener">RCA Space ↗</a>
         <a href="posts/ring-allreduce-failure.html">Post: ring under failure</a>
         <a href="posts/nccl-timeout-triage.html">Post: NCCL triage</a>
         <a href="posts/checkpoint-interval.html">Post: checkpoint interval</a>
@@ -188,10 +189,13 @@
         <div><dt>Why it’s hard</dt><dd>Disaggregation trades interference for data movement. The KV cache has to cross the network before decode can start, and has to stay correct when the network fails mid-transfer.</dd></div>
         <div><dt>Approach</dt><dd>A GPUDirect RDMA transport, a Triton KV re-layout kernel (kept only if the data justifies it), and a failure-aware coordinator. It plugs into vLLM through the KV connector interface and replaces the parts that move bytes and decide what to do when moving bytes goes wrong.</dd></div>
         <div><dt>Status</dt><dd><span class="status status-wip">M1 · in progress</span> &nbsp;Baselines and hardware ceilings first; results cells stay “—” until measured.</dd></div>
+        <div><dt>Hugging Face</dt><dd>Every measured transfer becomes a row in a public dataset, next to its perftest ceiling and the prefill time it would take to recompute instead. A Space answers <strong>“move the KV cache or recompute it?”</strong> from measured rows only: no simulation, no extrapolation. <span class="status status-early">planned</span></dd></div>
       </dl>
       <div class="problem-links">
-        <a class="primary" href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">Repo ↗</a>
-        <a href="https://github.com/nareshns2004/custom-cuda-fused-attention-triton" target="_blank" rel="noopener">CUDA/Triton kernels ↗</a>
+        <a class="primary" href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">Repo ↗</a>
+        <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/tree/main/kernels" target="_blank" rel="noopener">Triton re-layout kernel ↗</a>
+        <a href="https://huggingface.co/datasets/nareshns2004/rdma-kv-transfer-traces" target="_blank" rel="noopener">Traces dataset ↗</a>
+        <a href="https://huggingface.co/spaces/nareshns2004/disagg-kv-explorer" target="_blank" rel="noopener">Explorer Space ↗</a>
         <a href="posts/kv-cache-transfer.html">Post: the KV-cache bill</a>
         <a href="posts/pfc-deadlock.html">Post: PFC deadlock</a>
       </div>
@@ -206,7 +210,7 @@
       <dl>
         <div><dt>Problem</dt><dd>The fastest paths in an AI cluster are the least watched. <strong>RDMA bypasses the host kernel</strong>, so firewalls and eBPF never see it. <strong>Checkpoints are programs</strong>: pickle runs code on load. And <strong>AI agents now hold the credentials</strong>, taking instructions from whatever they read.</dd></div>
         <div><dt>Why it’s hard</dt><dd>Every control costs latency or bandwidth on hardware that is billed by the second, so security that slows the step gets turned off. The work is finding the controls that sit <em>off</em> the hot path: at the NIC, in the artifact format, at the tool boundary.</dd></div>
-        <div><dt>Approach</dt><dd>Threat-model each layer against <a href="posts/ai-infra-breaches.html">real incidents</a>, then build the control into the system rather than bolting it on. Already in my repos: goodput’s fault injector is <strong>default-deny</strong>. It acts only on allowlisted hosts, every fault carries an auto-revert watchdog, destructive mechanisms need an explicit opt-in, and GPU resets, firmware and switch changes are never automated (<a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>). kvwire’s <a href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">ADR-0005</a> evaluates <strong>per-transfer memory windows</strong>, invalidated before a KV block is reused, so the NIC itself rejects a late or stray write.</dd></div>
+        <div><dt>Approach</dt><dd>Threat-model each layer against <a href="posts/ai-infra-breaches.html">real incidents</a>, then build the control into the system rather than bolting it on. Already in my repos: goodput’s fault injector is <strong>default-deny</strong>. It acts only on allowlisted hosts, every fault carries an auto-revert watchdog, destructive mechanisms need an explicit opt-in, and GPU resets, firmware and switch changes are never automated (<a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>). kvwire’s <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">ADR-0005</a> evaluates <strong>per-transfer memory windows</strong>, invalidated before a KV block is reused, so the NIC itself rejects a late or stray write.</dd></div>
         <div><dt>Status</dt><dd><span class="status status-ok">safety invariants in code</span> <span class="status status-early">fencing ADR proposed</span> <span class="status status-early">goodput RCA tier: recommends, never acts · planned</span> &nbsp;Plus five interactive security posts below.</dd></div>
       </dl>
       <div class="problem-links">
@@ -318,22 +322,23 @@
       <tbody>
         <tr class="grp"><th colspan="3" scope="rowgroup">Systems &amp; networking</th></tr>
         <tr><td>Collectives &amp; NCCL</td><td>design + harness</td><td>
-          <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput ↗</a>
+          <a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener">goodput ↗</a>
           <a href="https://github.com/nareshns2004/distributed-training-framework-nccl" target="_blank" rel="noopener">distributed-training-framework-nccl ↗</a>
           <a href="posts/ring-allreduce-failure.html">ring all-reduce post</a>
           <a href="posts/rail-topology.html">rail topology post</a></td></tr>
         <tr><td>RDMA / RoCE / PFC</td><td>runnable</td><td>
           <a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener">nicprof ↗</a>
-          <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire ↗</a>
+          <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">kvwire ↗</a>
           <a href="posts/pfc-deadlock.html">PFC deadlock post</a>
           <a href="posts/packet-path.html">packet path post</a></td></tr>
         <tr><td>Linux kernel performance</td><td>runnable</td><td>
           <a href="https://github.com/nareshns2004/kernel-performance-toolkit" target="_blank" rel="noopener">kptk ↗</a></td></tr>
         <tr><td>Inference serving</td><td>early</td><td>
-          <a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener">kvwire ↗</a>
+          <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener">kvwire ↗</a>
           <a href="https://github.com/nareshns2004/high-performance-llm-inference-engine" target="_blank" rel="noopener">high-performance-llm-inference-engine ↗</a>
           <a href="posts/kv-cache-transfer.html">KV-cache post</a></td></tr>
         <tr><td>GPU kernels (CUDA / Triton)</td><td>early</td><td>
+          <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/tree/main/kernels" target="_blank" rel="noopener">kvwire KV re-layout kernel ↗</a>
           <a href="https://github.com/nareshns2004/custom-cuda-fused-attention-triton" target="_blank" rel="noopener">custom-cuda-fused-attention-triton ↗</a></td></tr>
         <tr><td>eBPF / XDP / tc</td><td>early</td><td>
           <a href="https://github.com/nareshns2004/kernel-level-ai-traffic-shaper" target="_blank" rel="noopener">kernel-level-ai-traffic-shaper ↗</a>
@@ -343,19 +348,23 @@
         <!-- TODO(naresh): Virtualization (SR-IOV / KVM) row removed with the Substack essay; re-add with a repo, talk or post. -->
         <tr><td>Incident triage models</td><td>design</td><td>
           <a href="https://huggingface.co/nareshns2004/qwen3-nccl-rca-lora" target="_blank" rel="noopener">qwen3-nccl-rca-lora model card ↗</a>
+          <a href="https://huggingface.co/spaces/nareshns2004/nccl-incident-rca" target="_blank" rel="noopener">nccl-incident-rca Space ↗</a>
           <a href="posts/nccl-timeout-triage.html">NCCL triage post</a></td></tr>
+        <tr><td>KV-transfer measurements</td><td>planned</td><td>
+          <a href="https://huggingface.co/datasets/nareshns2004/rdma-kv-transfer-traces" target="_blank" rel="noopener">rdma-kv-transfer-traces dataset ↗</a>
+          <a href="https://huggingface.co/spaces/nareshns2004/disagg-kv-explorer" target="_blank" rel="noopener">disagg-kv-explorer Space ↗</a></td></tr>
         <tr class="grp sec"><th colspan="3" scope="rowgroup">AI/ML infrastructure security</th></tr>
         <tr><td>Threat modeling AI infra</td><td>write-up</td><td>
           <a href="posts/ai-infra-breaches.html">breach field guide</a>
           <a href="#security">layered threat map</a></td></tr>
         <tr><td>AI agent &amp; tool-use security</td><td>write-up + design</td><td>
           <a href="posts/agent-blast-radius.html">agent blast-radius simulator</a>
-          <a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">goodput safety invariants ↗</a></td></tr>
+          <a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator/blob/main/SECURITY.md" target="_blank" rel="noopener">goodput safety invariants ↗</a></td></tr>
         <tr><td>Model &amp; checkpoint supply chain</td><td>runs in browser</td><td>
           <a href="posts/pickle-is-a-program.html">pickle disassembler &amp; scanner</a></td></tr>
         <tr><td>RDMA / fabric security</td><td>write-up + design</td><td>
           <a href="posts/rdma-trust-model.html">RDMA trust-model post</a>
-          <a href="https://github.com/nareshns2004/disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">kvwire ADR-0005: memory-window fencing ↗</a></td></tr>
+          <a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine/blob/main/docs/adr/0005-stale-write-fencing.md" target="_blank" rel="noopener">kvwire ADR-0005: memory-window fencing ↗</a></td></tr>
         <tr><td>Multi-tenant inference isolation</td><td>write-up</td><td>
           <a href="posts/prefix-cache-side-channel.html">prefix-cache side-channel post</a></td></tr>
       </tbody>
@@ -407,8 +416,8 @@
     <p>I’m looking for GPU cluster networking, distributed-training infrastructure, inference-platform and AI-infrastructure security roles at AI labs and infra teams.</p>
     <ul class="role-proof" aria-label="Roles I’m looking for, with proof of work for each">
       <li><a href="https://github.com/nareshns2004/ai-nic-performance-profiler" target="_blank" rel="noopener" style="--pc:var(--ink)"><span class="role-name">GPU cluster networking</span><span class="role-link">nicprof: NIC counters to step time ↗</span></a></li>
-      <li><a href="https://github.com/nareshns2004/fault-tolerant-training-orchestrator" target="_blank" rel="noopener" style="--pc:var(--signal)"><span class="role-name">Distributed-training infrastructure</span><span class="role-link">goodput: fault attribution &amp; recovery ↗</span></a></li>
-      <li><a href="https://github.com/nareshns2004/disaggregated-inference-engine" target="_blank" rel="noopener" style="--pc:var(--copper)"><span class="role-name">Inference platforms</span><span class="role-link">kvwire: RDMA KV-cache transport ↗</span></a></li>
+      <li><a href="https://github.com/nareshns2004/goodput-fault-tolerant-training-orchestrator" target="_blank" rel="noopener" style="--pc:var(--signal)"><span class="role-name">Distributed-training infrastructure</span><span class="role-link">goodput: fault attribution &amp; recovery ↗</span></a></li>
+      <li><a href="https://github.com/nareshns2004/kvwire-disaggregated-inference-engine" target="_blank" rel="noopener" style="--pc:var(--copper)"><span class="role-name">Inference platforms</span><span class="role-link">kvwire: RDMA KV-cache transport ↗</span></a></li>
       <li><a href="posts/ai-infra-breaches.html" style="--pc:var(--fault)"><span class="role-name">AI-infrastructure security</span><span class="role-link">Field guide: AI-infra breaches →</span></a></li>
     </ul>
     <div class="contact-meta">
@@ -430,7 +439,7 @@
     <a class="social" href="https://hub.docker.com/u/nareshns2004" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></svg><span>Docker Hub</span></a>
     <a class="social" href="https://x.com/naresh_swe24" target="_blank" rel="noopener me"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>@naresh_swe24</span></a>
   </div>
-  <span>© Naresh Kumar · <a href="https://github.com/nareshns2004/portfolio-webapp" target="_blank" rel="noopener">source</a> · press <kbd>⌘K</kbd> to jump</span>
+  <span>© Naresh Kumar · <a href="https://github.com/nareshns2004/naresh-webapp" target="_blank" rel="noopener">source</a> · press <kbd>⌘K</kbd> to jump</span>
   <div class="footer-links">
     <a href="#top">Back to top ↑</a>
   </div>

@@ -30,6 +30,8 @@ Backlog from CLAUDE.md, ordered by impact.
 - [ ] Profile README badge still says `naresh.infra`; rename to match the site.
 - [x] **Contact refresh** (`feature/contact-socials-timeless-bio`): socials row moved from Profiles to the homepage footer with a new Gmail link, replacing the footer text links and the contact buttons; each role type links to its proof; hero bio no longer states a year count.
 
+- [x] **Discord** (`feature/discord-invite`): Discord invite added right after Gmail in the homepage socials row, post/404 footers and the ⌘K palette; footer "source" link removed.
+
 ## Open questions for Naresh
 
 - **Toolbox list:** the AI-infra-security tool list (SPIFFE/SPIRE, Falco/Tetragon, Sigstore/SLSA, confidential computing…) was added in the Nov 2026 refresh. Prune anything you can't defend in an interview.

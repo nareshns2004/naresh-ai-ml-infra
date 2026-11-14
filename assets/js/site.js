@@ -148,6 +148,7 @@
     { k: 'repo', t: 'kptk: kernel performance toolkit', ...ext('https://github.com/nareshns2004/kernel-performance-toolkit') },
     { k: 'profile', t: 'GitHub', ...ext('https://github.com/nareshns2004') },
     { k: 'profile', t: 'Hugging Face', ...ext('https://huggingface.co/nareshns2004') },
+    { k: 'profile', t: 'Discord', ...ext('https://discord.gg/WHtQAnRJ98') },
     { k: 'profile', t: 'LinkedIn', ...ext('https://www.linkedin.com/in/nareshns2004/') },
     { k: 'profile', t: 'Substack', ...ext('https://substack.com/@nareshns2004') },
     { k: 'profile', t: 'YouTube', ...ext('https://www.youtube.com/@nareshns2004') },

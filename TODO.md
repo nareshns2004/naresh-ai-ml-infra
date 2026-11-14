@@ -42,4 +42,4 @@ Backlog from CLAUDE.md, ordered by impact.
 - ~~Hugging Face~~: done 13 Nov 2026. Four planned artifacts linked (model + Space from goodput, dataset + Space from kvwire); `infra-incident-intel` is dropped for good.
 - The removed write-ups (DPDK, virtualization, LLM OS, AI infra roadmap essays; XDP / DPDK PMD / RDMA / RoCE / SR-IOV drafts): rebuild any worth keeping as an on-site post, or add as `kind: "external"` in `data.js`.
 
-Next session starts with: review the Vercel preview of `feature/contact-socials-timeless-bio`, then prune the Toolbox list and work through the open questions above (vLLM PR link) and the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl.
+Next session starts with: review the Vercel preview of `feature/discord-invite`, then prune the Toolbox list and work through the open questions above (vLLM PR link) and the over-claiming READMEs in kernel-level-ai-traffic-shaper and distributed-training-framework-nccl.
